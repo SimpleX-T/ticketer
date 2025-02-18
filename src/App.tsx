@@ -442,7 +442,7 @@ const GeneratedTicket: React.FC<GeneratedTicketProps> = ({
   const ticketRef = useRef<HTMLDivElement>(null);
 
   const onDownloadTicket = async () => {
-    console.log(tidke);
+    console.log(ticketRef.current);
 
     if (ticketRef.current === null) return;
     toPng(ticketRef.current, { quality: 1.0, pixelRatio: 3 }).then(
