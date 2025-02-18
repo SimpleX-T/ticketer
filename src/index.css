@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+body {
+  font-family: "Poppins", sans-serif;
+}
+
+.ticket {
+  background: url(/subtract.png) center center no-repeat;
+  background-size: 100% 100%;
+}
