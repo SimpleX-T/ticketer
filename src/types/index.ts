@@ -42,6 +42,13 @@ export interface GeneratedTicketProps {
   onBookAnother: () => void;
 }
 
+export interface User {
+  id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+}
+
 export interface Event {
   id: string;
   name: string;
