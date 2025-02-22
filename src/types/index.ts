@@ -1,7 +1,7 @@
 import { ChangeEventHandler } from "react";
 
 export interface TicketType {
-  id: number;
+  id: number | string;
   name: string;
   price: string;
   type: "REGULAR" | "VIP" | "VVIP";
@@ -16,14 +16,14 @@ export interface UserTicketData {
   ticketCount: number;
   profileImage: string | null;
   specialRequest: string;
-  ticketId: string;
+  ticketId: string | number;
   eventId: string;
   eventName: string;
 }
 
 export interface TicketSelectionProps {
-  ticketTypes: TicketType[];
-  selectedTicket: TicketType | null;
+  event: Event | undefined;
+  selectedTicket?: TicketType | null;
   onSelectTicket: (ticket: TicketType) => void;
   onNext: () => void;
   ticketCount: number;
@@ -31,6 +31,7 @@ export interface TicketSelectionProps {
 }
 
 export interface AttendeeFormProps {
+  event: Event | undefined;
   ticketData: UserTicketData;
   setTicketData: React.Dispatch<React.SetStateAction<UserTicketData>>;
   onBack: () => void;
@@ -56,10 +57,6 @@ export interface Event {
   location: string;
   description: string;
   image: string;
-  prices: {
-    REGULAR: string;
-    VIP: string;
-    VVIP: string;
-  };
+  ticketsType: TicketType[];
   soldOut: boolean;
 }

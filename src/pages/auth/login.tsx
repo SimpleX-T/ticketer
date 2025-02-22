@@ -9,7 +9,7 @@ export default function Login() {
     password: "",
   });
   const [formError, setFormError] = useState("");
-  const { handleLogin, isLoading, error } = useAuthContext();
+  const { handleLogin, isLoading, error, setError } = useAuthContext();
 
   const login = async (e: FormEvent) => {
     e.preventDefault();
@@ -57,6 +57,7 @@ export default function Login() {
               onChange={(e) => {
                 setForm((prev) => ({ ...prev, email: e.target.value }));
                 setFormError("");
+                setError({ login: { message: "" } });
               }}
               className="px-3 w-full py-2 border rounded-md border-secondary placeholder:text-secondary-100 text-secondary outline-none text-sm"
             />
@@ -77,6 +78,7 @@ export default function Login() {
               onChange={(e) => {
                 setForm((prev) => ({ ...prev, password: e.target.value }));
                 setFormError("");
+                setError({ login: { message: "" } });
               }}
               className="px-3 w-full py-2 border rounded-md border-secondary placeholder:text-secondary-100 text-secondary outline-none text-sm"
             />

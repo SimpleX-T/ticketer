@@ -1,51 +1,28 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { TicketSelection } from "../components/bookings/TicketSelection";
-import { TicketType, UserTicketData } from "../types";
+import { Event, TicketType, UserTicketData } from "../types";
 import { GeneratedTicket } from "../components/bookings/GeneratedTicket";
 import { AttendeeForm } from "../components/bookings/AttendeeForm";
 import { useParams } from "react-router-dom";
-
-const TICKET_TYPES: TicketType[] = [
-  {
-    id: 1,
-    name: "REGULAR ACCESS",
-    price: "Free",
-    type: "REGULAR",
-    available: 20,
-    total: 52,
-  },
-  {
-    id: 2,
-    name: "VIP ACCESS",
-    price: "$150",
-    type: "VIP",
-    available: 20,
-    total: 52,
-  },
-  {
-    id: 3,
-    name: "VVIP ACCESS",
-    price: "$150",
-    type: "VVIP",
-    available: 20,
-    total: 52,
-  },
-];
+import { mockEvents } from "../utils/constants";
+import { useAuthContext } from "../contexts/AuthContext";
 
 export default function BookingPage() {
-  const x = useParams();
-  console.log(x); // log for debugging
+  const params = useParams<{ eventId: string }>();
+  const event = mockEvents.find((event: Event) => event.id === params.eventId);
+  const { user } = useAuthContext();
+
   const [step, setStep] = useState<number>(1);
   const [ticketData, setTicketData] = useState<UserTicketData>({
-    userName: "",
-    userEmail: "",
+    userName: user.firstname + " " + user.lastname,
+    userEmail: user.email,
     ticketType: null,
     ticketCount: 1,
     profileImage: null,
     specialRequest: "",
     ticketId: "",
-    eventName: "Event Name",
-    eventId: "Event ID",
+    eventName: event?.name || "",
+    eventId: event?.id || "",
   });
   const [stepTitle, setStepTitle] = useState<string>("Ticket Selection");
 
@@ -63,9 +40,9 @@ export default function BookingPage() {
     }
   }, [step]);
 
-  const generateTicketId = (): string => {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  };
+  // const generateTicketId = (): string => {
+  //   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  // };
 
   return (
     <div className="select-none min-h-screen relative bg-primary overflow-hidden w-full flex items-center justify-center">
@@ -89,10 +66,14 @@ export default function BookingPage() {
 
             {step === 1 && (
               <TicketSelection
-                ticketTypes={TICKET_TYPES}
+                event={event}
                 selectedTicket={ticketData.ticketType}
                 onSelectTicket={(ticket: TicketType) =>
-                  setTicketData({ ...ticketData, ticketType: ticket })
+                  setTicketData((prev) => ({
+                    ...prev,
+                    ticketType: ticket,
+                    ticketId: ticket.id,
+                  }))
                 }
                 onNext={() => setStep(2)}
                 ticketCount={ticketData.ticketCount}
@@ -107,14 +88,11 @@ export default function BookingPage() {
 
             {step === 2 && (
               <AttendeeForm
+                event={event}
                 ticketData={ticketData}
                 setTicketData={setTicketData}
                 onBack={() => setStep(1)}
                 onSubmit={() => {
-                  setTicketData({
-                    ...ticketData,
-                    ticketId: generateTicketId(),
-                  });
                   setStep(3);
                 }}
               />

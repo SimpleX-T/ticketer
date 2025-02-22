@@ -5,6 +5,7 @@ import LandingPage from "./pages/LandingPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/auth/login";
 import { AuthProvider } from "./contexts/AuthContext";
+import { AppProvider } from "./contexts/AppContext";
 
 const router = createBrowserRouter([
   {
@@ -25,10 +26,14 @@ const router = createBrowserRouter([
       },
       {
         path: "/login",
+        element: <Login />,
+      },
+      {
+        path: "/my-tickets",
         element: (
-          <AuthProvider>
-            <Login />
-          </AuthProvider>
+          <ProtectedRoute>
+            <div>My Tickets</div>
+          </ProtectedRoute>
         ),
       },
     ],
@@ -36,7 +41,13 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <AppProvider>
+        <RouterProvider router={router} />
+      </AppProvider>
+    </AuthProvider>
+  );
 }
 
 export default App;

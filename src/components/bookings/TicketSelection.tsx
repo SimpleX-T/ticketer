@@ -1,7 +1,8 @@
 import { TicketSelectionProps } from "../../types";
+import { FaCalendar } from "react-icons/fa6";
 
 export const TicketSelection: React.FC<TicketSelectionProps> = ({
-  ticketTypes,
+  event,
   selectedTicket,
   onSelectTicket,
   onNext,
@@ -12,18 +13,16 @@ export const TicketSelection: React.FC<TicketSelectionProps> = ({
     <div className="bg-primary-400 border border-secondary-200 rounded-xl p-8">
       <div className="bg-gradient-to-br from-secondary-200 via-transparent to-transparent border-2 border-secondary-200 p-3 rounded-2xl mb-8 text-center">
         <h2 className="text-6xl font-bold text-white mb-2 font-[Road_Rage]">
-          Techember Fest "25
+          {event?.name}
         </h2>
-        <p className="text-md text-white">
-          Join us for an unforgettable experience at Techember Fest! Secure your
-          spot now.
-        </p>
+        <p className="text-md text-white">{event?.description}</p>
         <p className="text-xs text-center w-full justify-center text-gray-300 flex flex-wrap gap-2 mt-1">
-          <span className="inline">
-            📍 123 Techember Street, Techville, Techland
-          </span>
+          <span className="inline">📍{event?.location}</span>
           ||
-          <span>March 15, 2025 | 7:00 PM</span>
+          <span className="flex items-center">
+            <FaCalendar size={10} className="inline mr-1" />
+            {event?.date}
+          </span>
         </p>
       </div>
 
@@ -34,7 +33,7 @@ export const TicketSelection: React.FC<TicketSelectionProps> = ({
           Select Ticket Type
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 w-full bg-secondary-400 rounded-xl border border-secondary-200 p-2">
-          {ticketTypes.map((ticket) => (
+          {event?.ticketsType.map((ticket) => (
             <button
               key={ticket.id}
               onClick={() => onSelectTicket(ticket)}

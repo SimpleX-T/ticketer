@@ -20,6 +20,7 @@ interface AuthContextType {
   handleLogin: (email: string, password: string) => void;
   isLoading: boolean;
   error: AuthError;
+  setError: (error: AuthError) => void;
 }
 
 const initialState: AuthContextType = {
@@ -36,6 +37,7 @@ const initialState: AuthContextType = {
     login: { message: "" },
     signup: { message: "" },
   },
+  setError: () => {},
 };
 
 const AuthContext = createContext<AuthContextType>(initialState);
@@ -49,16 +51,20 @@ const AUTHENTICATED_KEY = "userIsAuthenticated";
 
 const AuthProvider = ({ children }: AppProviderProps) => {
   const [user, setUser] = useState<User>(initialState.user);
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    localStorage.getItem(AUTHENTICATED_KEY) === "true"
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    initialState.isAuthenticated
   );
   const [isLoading, setIsLoading] = useState(initialState.isLoading);
   const [error, setError] = useState<AuthError>(initialState.error);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem(USER_KEY) || "");
-    if (!user) return setIsAuthenticated(false);
+    const isAuthenticated = localStorage.getItem(AUTHENTICATED_KEY);
+    if (!isAuthenticated) return;
+
+    const user = localStorage.getItem(USER_KEY) || "";
+    if (!user) return;
     setUser(JSON.parse(user));
+    setIsAuthenticated(Boolean(localStorage.getItem(AUTHENTICATED_KEY)));
   }, []);
 
   const handleLogin = async (email: string, password: string) => {
@@ -69,18 +75,22 @@ const AuthProvider = ({ children }: AppProviderProps) => {
 
     setIsLoading(true);
     const user = mockUsers.find((user) => user.email === email);
-
-    if (!user)
-      return setError({
+    console.log(user);
+    if (!user) {
+      setError({
         login: {
           message:
             "User with email not found, make sure the email is registered on our system.",
         },
       });
+      return setIsLoading(false);
+    }
 
     setTimeout(() => {
       // simulating a promise
       setUser(user);
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+      localStorage.setItem(AUTHENTICATED_KEY, "true");
       setIsLoading(false);
     }, 1000);
   };
@@ -91,6 +101,7 @@ const AuthProvider = ({ children }: AppProviderProps) => {
     handleLogin,
     isLoading,
     error,
+    setError,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

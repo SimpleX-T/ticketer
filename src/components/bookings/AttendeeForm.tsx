@@ -11,7 +11,7 @@ export const AttendeeForm: React.FC<AttendeeFormProps> = ({
   onSubmit,
 }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { addTicket } = useAppContext();
+  const { userTickets, addTicket } = useAppContext();
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -44,16 +44,10 @@ export const AttendeeForm: React.FC<AttendeeFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      addTicket({
-        id: ticketData.ticketId,
-        name: ticketData.userName,
-        price: ticketData.ticketType?.price || "",
-        type: ticketData.ticketType?.type || "REGULAR",
-        eventName: "Event Name",
-        eventId: "Event ID",
-        total: ticketData.ticketCount,
-      });
+      addTicket(ticketData);
       onSubmit();
+      console.log(ticketData);
+      console.log(userTickets);
     }
   };
 
@@ -111,13 +105,14 @@ export const AttendeeForm: React.FC<AttendeeFormProps> = ({
             onChange={(e) =>
               setTicketData({ ...ticketData, userName: e.target.value })
             }
-            className="w-full bg-transparent text-white border border-secondary-200 rounded-md p-2 focus:outline-none"
+            className="w-full bg-transparent text-secondary text-sm border border-secondary-200 rounded-md p-2 focus:outline-none"
           />
           {errors.name && (
             <div className="text-red-500 text-xs">{errors.name}</div>
           )}
         </div>
 
+        {/*Email input field*/}
         <div>
           <label
             htmlFor="email"
@@ -133,7 +128,7 @@ export const AttendeeForm: React.FC<AttendeeFormProps> = ({
               onChange={(e) =>
                 setTicketData({ ...ticketData, userEmail: e.target.value })
               }
-              className="w-full bg-transparent text-white border border-secondary-200 rounded-md p-2 focus:outline-none pl-10"
+              className="w-full bg-transparent text-sm text-secondary border border-secondary-200 rounded-md p-2 focus:outline-none pl-10"
             />
             <CgMail
               size={24}
@@ -160,7 +155,7 @@ export const AttendeeForm: React.FC<AttendeeFormProps> = ({
             onChange={(e) =>
               setTicketData({ ...ticketData, specialRequest: e.target.value })
             }
-            className="w-full bg-transparent resize-none text-white border border-secondary-200 rounded-md p-2 focus:outline-none"
+            className="w-full bg-transparent resize-none text-secondary text-sm border border-secondary-200 rounded-md p-2 focus:outline-none"
             rows={3}
           />
         </div>

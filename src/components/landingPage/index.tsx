@@ -1,35 +1,35 @@
 import { useState } from "react";
-import { useAppContext } from "../../contexts/AppContext";
+// import { useAppContext } from "../../contexts/AppContext";
 import { HiMiniCheckBadge } from "react-icons/hi2";
 import { BsQrCode } from "react-icons/bs";
 import { FaTicket } from "react-icons/fa6";
 import { motion } from "motion/react";
-import { Event } from "../../types";
+// import { Event } from "../../types";
 import { Link } from "react-router-dom";
 import { mockEvents } from "../../utils/constants";
 
 const Home = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const { addTicket } = useAppContext();
+  // const { addTicket } = useAppContext();
 
   const filteredEvents = mockEvents.filter((event) =>
     event.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleBuyTicket = (
-    event: Event,
-    ticketType: "REGULAR" | "VIP" | "VVIP"
-  ) => {
-    addTicket({
-      id: `${event.id}-${Date.now()}`,
-      name: event.name,
-      price: event.prices[ticketType],
-      type: ticketType,
-      eventName: event.name,
-      eventId: event.id,
-      total: parseInt(event.prices[ticketType]),
-    });
-  };
+  // const handleBuyTicket = (
+  //   event: Event,
+  //   ticketType: "REGULAR" | "VIP" | "VVIP"
+  // ) => {
+  //   addTicket({
+  //     id: `${event.id}-${Date.now()}`,
+  //     name: event.name,
+  //     ticketType: event.ticketsType,
+  //     type: ticketType,
+  //     eventName: event.name,
+  //     eventId: event.id,
+  //     total: parseInt(event.ticketsType[ticketType]),
+  //   });
+  // };
 
   return (
     <div className="min-h-screen bg-white w-full">
@@ -169,7 +169,7 @@ const Home = () => {
 
                   <p className="text-secibdary-400 mb-4">{event.description}</p>
 
-                  <div className="space-y-3">
+                  {/* <div className="space-y-3">
                     {Object.entries(event.prices).map(([type, price]) => (
                       <button
                         key={type}
@@ -191,7 +191,7 @@ const Home = () => {
                         <span className="font-semibold">${price}</span>
                       </button>
                     ))}
-                  </div>
+                  </div> */}
                 </div>
               </Link>
             </motion.div>

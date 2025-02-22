@@ -1,24 +1,21 @@
-import { createContext, ReactNode, useContext, useState } from "react";
-
-interface UserTicket {
-  id: string;
-  name: string;
-  price: string;
-  type: "REGULAR" | "VIP" | "VVIP";
-  eventName: string;
-  eventId: string;
-  total: number;
-}
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { UserTicketData } from "../types";
 
 interface AppContextType {
-  userTickets: UserTicket[];
-  addTicket: (ticket: UserTicket) => void;
+  userTickets: UserTicketData[];
+  addTicket: (ticket: UserTicketData) => void;
   removeTicket: (id: string) => void;
 }
 
 const initialState: AppContextType = {
   userTickets: [],
-  addTicket: () => {},
+  addTicket: () => () => {},
   removeTicket: () => {},
 };
 
@@ -29,14 +26,19 @@ interface AppProviderProps {
 }
 
 const AppProvider = ({ children }: AppProviderProps) => {
-  const [userTickets, setUserTickets] = useState<UserTicket[]>([]);
+  const [userTickets, setUserTickets] = useState<UserTicketData[]>([]);
 
-  const addTicket = (ticket: UserTicket) => {
-    setUserTickets([...userTickets, ticket]);
+  const addTicket = (ticket: UserTicketData) => () => {
+    console.log("Adding ticket: ", ticket);
+    setUserTickets((prev) => [...prev, ticket]);
   };
 
+  useEffect(() => {
+    console.log("User Tickets: ", userTickets);
+  }, [userTickets]);
+
   const removeTicket = (id: string) => {
-    setUserTickets(userTickets.filter((ticket) => ticket.id !== id));
+    setUserTickets(userTickets.filter((ticket) => ticket.ticketId !== id));
   };
 
   const value: AppContextType = {

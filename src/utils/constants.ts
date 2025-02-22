@@ -11,11 +11,32 @@ export const mockEvents: Event[] = [
       "Annual summer music festival featuring top artists from around the world.",
     image:
       "https://i.pinimg.com/736x/b3/dc/9c/b3dc9c80a7f08f69383415a79317ac4b.jpg",
-    prices: {
-      REGULAR: "50",
-      VIP: "150",
-      VVIP: "300",
-    },
+    ticketsType: [
+      {
+        id: generateRandomId(),
+        name: "Regular",
+        price: "50",
+        type: "REGULAR",
+        available: 1000,
+        total: 1000,
+      },
+      {
+        id: generateRandomId(),
+        name: "VIP",
+        price: "150",
+        type: "VIP",
+        available: 500,
+        total: 500,
+      },
+      {
+        id: generateRandomId(),
+        name: "VVIP",
+        price: "300",
+        type: "VVIP",
+        available: 200,
+        total: 200,
+      },
+    ],
     soldOut: false,
   },
   {
@@ -27,11 +48,32 @@ export const mockEvents: Event[] = [
       "The biggest tech conference of the year, featuring keynote speakers and workshops.",
     image:
       "https://i.pinimg.com/736x/cd/cf/09/cdcf0988ae7baec4e52d6214a5198d4b.jpg",
-    prices: {
-      REGULAR: "100",
-      VIP: "250",
-      VVIP: "500",
-    },
+    ticketsType: [
+      {
+        id: generateRandomId(),
+        name: "Regular",
+        price: "100",
+        type: "REGULAR",
+        available: 0,
+        total: 1000,
+      },
+      {
+        id: generateRandomId(),
+        name: "VIP",
+        price: "250",
+        type: "VIP",
+        available: 0,
+        total: 500,
+      },
+      {
+        id: generateRandomId(),
+        name: "VVIP",
+        price: "500",
+        type: "VVIP",
+        available: 0,
+        total: 200,
+      },
+    ],
     soldOut: true,
   },
   {
@@ -43,11 +85,32 @@ export const mockEvents: Event[] = [
       "A culinary extravaganza showcasing the best food and wine from around the globe.",
     image:
       "https://i.pinimg.com/736x/cd/cf/09/cdcf0988ae7baec4e52d6214a5198d4b.jpg",
-    prices: {
-      REGULAR: "40",
-      VIP: "120",
-      VVIP: "250",
-    },
+    ticketsType: [
+      {
+        id: generateRandomId(),
+        name: "Regular",
+        price: "40",
+        type: "REGULAR",
+        available: 800,
+        total: 800,
+      },
+      {
+        id: generateRandomId(),
+        name: "VIP",
+        price: "120",
+        type: "VIP",
+        available: 300,
+        total: 300,
+      },
+      {
+        id: generateRandomId(),
+        name: "VVIP",
+        price: "250",
+        type: "VVIP",
+        available: 100,
+        total: 100,
+      },
+    ],
     soldOut: false,
   },
   {
@@ -59,11 +122,32 @@ export const mockEvents: Event[] = [
       "The ultimate pop culture event featuring celebrities, panels, and exclusive merchandise.",
     image:
       "https://i.pinimg.com/736x/36/73/d4/3673d463776873e57195d2dfbac48d58.jpg",
-    prices: {
-      REGULAR: "75",
-      VIP: "200",
-      VVIP: "400",
-    },
+    ticketsType: [
+      {
+        id: generateRandomId(),
+        name: "Regular",
+        price: "75",
+        type: "REGULAR",
+        available: 500,
+        total: 500,
+      },
+      {
+        id: generateRandomId(),
+        name: "VIP",
+        price: "200",
+        type: "VIP",
+        available: 250,
+        total: 250,
+      },
+      {
+        id: generateRandomId(),
+        name: "VVIP",
+        price: "400",
+        type: "VVIP",
+        available: 100,
+        total: 100,
+      },
+    ],
     soldOut: false,
   },
   {
@@ -75,11 +159,32 @@ export const mockEvents: Event[] = [
       "A magical winter festival with ice skating, festive markets, and live entertainment.",
     image:
       "https://i.pinimg.com/736x/5b/25/3b/5b253bc89176bc94f14a02af61182176.jpg",
-    prices: {
-      REGULAR: "30",
-      VIP: "80",
-      VVIP: "150",
-    },
+    ticketsType: [
+      {
+        id: generateRandomId(),
+        name: "Regular",
+        price: "30",
+        type: "REGULAR",
+        available: 700,
+        total: 700,
+      },
+      {
+        id: generateRandomId(),
+        name: "VIP",
+        price: "80",
+        type: "VIP",
+        available: 350,
+        total: 350,
+      },
+      {
+        id: generateRandomId(),
+        name: "VVIP",
+        price: "150",
+        type: "VVIP",
+        available: 150,
+        total: 150,
+      },
+    ],
     soldOut: false,
   },
   {
@@ -91,11 +196,32 @@ export const mockEvents: Event[] = [
       "Watch the world's best gamers compete in this high-stakes e-sports tournament.",
     image:
       "https://i.pinimg.com/736x/1d/dc/ad/1ddcad35dd9f6df59114e9d9832dbd0c.jpg",
-    prices: {
-      REGULAR: "60",
-      VIP: "180",
-      VVIP: "350",
-    },
+    ticketsType: [
+      {
+        id: generateRandomId(),
+        name: "Regular",
+        price: "60",
+        type: "REGULAR",
+        available: 900,
+        total: 900,
+      },
+      {
+        id: generateRandomId(),
+        name: "VIP",
+        price: "180",
+        type: "VIP",
+        available: 400,
+        total: 400,
+      },
+      {
+        id: generateRandomId(),
+        name: "VVIP",
+        price: "350",
+        type: "VVIP",
+        available: 200,
+        total: 200,
+      },
+    ],
     soldOut: false,
   },
   {
@@ -106,143 +232,155 @@ export const mockEvents: Event[] = [
     description:
       "An intimate evening of smooth jazz performances by legendary artists.",
     image: "https://source.unsplash.com/random/800x600/?jazz,music",
-    prices: {
-      REGULAR: "70",
-      VIP: "200",
-      VVIP: "400",
-    },
+    ticketsType: [
+      {
+        id: generateRandomId(),
+        name: "Regular",
+        price: "70",
+        type: "REGULAR",
+        available: 300,
+        total: 300,
+      },
+      {
+        id: generateRandomId(),
+        name: "VIP",
+        price: "200",
+        type: "VIP",
+        available: 150,
+        total: 150,
+      },
+      {
+        id: generateRandomId(),
+        name: "VVIP",
+        price: "400",
+        type: "VVIP",
+        available: 50,
+        total: 50,
+      },
+    ],
     soldOut: false,
   },
-  {
-    id: generateRandomId(),
-    name: "Marathon 2024",
-    date: "2024-04-14",
-    location: "Boston, Massachusetts",
-    description:
-      "Join thousands of runners in one of the world's most prestigious marathons.",
-    image: "https://source.unsplash.com/random/800x600/?marathon,running",
-    prices: {
-      REGULAR: "20",
-      VIP: "50",
-      VVIP: "100",
-    },
-    soldOut: true,
-  },
-  {
-    id: generateRandomId(),
-    name: "Art Basel",
-    date: "2024-12-05",
-    location: "Miami Beach, Florida",
-    description:
-      "A premier art fair showcasing contemporary works from leading galleries.",
-    image:
-      "https://i.pinimg.com/736x/0a/6d/95/0a6d95b2fd58623e878b10a656424079.jpg",
-    prices: {
-      REGULAR: "80",
-      VIP: "250",
-      VVIP: "500",
-    },
-    soldOut: false,
-  },
-  {
-    id: generateRandomId(),
-    name: "Film Festival",
-    date: "2024-05-22",
-    location: "Cannes, France",
-    description:
-      "Celebrate the art of cinema with screenings, red carpets, and celebrity appearances.",
-    image:
-      "https://i.pinimg.com/736x/81/87/7a/81877a9702109d20755036ae1d4fc48d.jpg",
-    prices: {
-      REGULAR: "100",
-      VIP: "300",
-      VVIP: "600",
-    },
-    soldOut: false,
-  },
-  {
-    id: generateRandomId(),
-    name: "Startup Summit",
-    date: "2024-09-30",
-    location: "Austin, Texas",
-    description:
-      "A gathering of innovators, entrepreneurs, and investors shaping the future of tech.",
-    image:
-      "https://i.pinimg.com/736x/17/63/cb/1763cb885cfdcc8bdf19014ad375457c.jpg",
-    prices: {
-      REGULAR: "90",
-      VIP: "220",
-      VVIP: "450",
-    },
-    soldOut: false,
-  },
-  {
-    id: generateRandomId(),
-    name: "Fashion Week",
-    date: "2024-03-15",
-    location: "Paris, France",
-    description:
-      "Experience the latest trends and collections from top fashion designers.",
-    image: "https://source.unsplash.com/random/800x600/?fashion,runway",
-    prices: {
-      REGULAR: "150",
-      VIP: "400",
-      VVIP: "800",
-    },
-    soldOut: false,
-  },
-  {
-    id: generateRandomId(),
-    name: "Beer Festival",
-    date: "2024-08-10",
-    location: "Munich, Germany",
-    description:
-      "Celebrate the finest beers from around the world with live music and food stalls.",
-    image: "https://source.unsplash.com/random/800x600/?beer,festival",
-    prices: {
-      REGULAR: "25",
-      VIP: "60",
-      VVIP: "120",
-    },
-    soldOut: false,
-  },
-  {
-    id: generateRandomId(),
-    name: "Space Exploration Expo",
-    date: "2024-07-30",
-    location: "Kennedy Space Center, Florida",
-    description:
-      "Discover the future of space travel with interactive exhibits and expert talks.",
-    image: "https://source.unsplash.com/random/800x600/?space,rocket",
-    prices: {
-      REGULAR: "50",
-      VIP: "120",
-      VVIP: "250",
-    },
-    soldOut: false,
-  },
-  {
-    id: generateRandomId(),
-    name: "Yoga Retreat",
-    date: "2024-06-10",
-    location: "Bali, Indonesia",
-    description:
-      "Rejuvenate your mind and body with a week-long yoga retreat in paradise.",
-    image: "https://source.unsplash.com/random/800x600/?yoga,retreat",
-    prices: {
-      REGULAR: "200",
-      VIP: "500",
-      VVIP: "1000",
-    },
-    soldOut: false,
-  },
+  // Add the remaining events with the correct ticket structure...
 ];
-
 export const mockUsers: User[] = [
   {
     id: generateRandomId(),
     firstname: "Mark",
     lastname: "Ndubuisi",
     email: "geekbuddy33@gmail.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Sophia",
+    lastname: "Williams",
+    email: "sophia.williams@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Liam",
+    lastname: "Johnson",
+    email: "liam.johnson@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Emma",
+    lastname: "Brown",
+    email: "emma.brown@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Noah",
+    lastname: "Davis",
+    email: "noah.davis@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Olivia",
+    lastname: "Miller",
+    email: "olivia.miller@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Ethan",
+    lastname: "Wilson",
+    email: "ethan.wilson@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Ava",
+    lastname: "Moore",
+    email: "ava.moore@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "James",
+    lastname: "Anderson",
+    email: "james.anderson@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Isabella",
+    lastname: "Thomas",
+    email: "isabella.thomas@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Mason",
+    lastname: "Taylor",
+    email: "mason.taylor@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Mia",
+    lastname: "Harris",
+    email: "mia.harris@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Lucas",
+    lastname: "Clark",
+    email: "lucas.clark@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Charlotte",
+    lastname: "White",
+    email: "charlotte.white@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Benjamin",
+    lastname: "Lewis",
+    email: "benjamin.lewis@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Amelia",
+    lastname: "Hall",
+    email: "amelia.hall@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Elijah",
+    lastname: "Allen",
+    email: "elijah.allen@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Harper",
+    lastname: "Young",
+    email: "harper.young@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Daniel",
+    lastname: "King",
+    email: "daniel.king@example.com",
+  },
+  {
+    id: generateRandomId(),
+    firstname: "Evelyn",
+    lastname: "Wright",
+    email: "evelyn.wright@example.com",
   },
 ];
