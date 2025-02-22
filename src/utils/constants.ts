@@ -260,8 +260,80 @@ export const mockEvents: Event[] = [
     ],
     soldOut: false,
   },
-  // Add the remaining events with the correct ticket structure...
+  {
+    id: generateRandomId(),
+    name: "Broadway Musical Showcase",
+    date: "2024-10-05",
+    location: "Broadway Theatre, New York",
+    description:
+      "Experience the magic of Broadway with performances from top musicals.",
+    image: "https://source.unsplash.com/random/800x600/?broadway,musical",
+    ticketsType: [
+      {
+        id: generateRandomId(),
+        name: "Regular",
+        price: "80",
+        type: "REGULAR",
+        available: 400,
+        total: 400,
+      },
+      {
+        id: generateRandomId(),
+        name: "VIP",
+        price: "220",
+        type: "VIP",
+        available: 200,
+        total: 200,
+      },
+      {
+        id: generateRandomId(),
+        name: "VVIP",
+        price: "450",
+        type: "VVIP",
+        available: 100,
+        total: 100,
+      },
+    ],
+    soldOut: false,
+  },
+  {
+    id: generateRandomId(),
+    name: "International Film Festival",
+    date: "2024-09-30",
+    location: "Cinema Complex, Berlin",
+    description:
+      "A week-long celebration of international cinema featuring premieres and director talks.",
+    image: "https://source.unsplash.com/random/800x600/?cinema,film",
+    ticketsType: [
+      {
+        id: generateRandomId(),
+        name: "Regular",
+        price: "45",
+        type: "REGULAR",
+        available: 600,
+        total: 600,
+      },
+      {
+        id: generateRandomId(),
+        name: "VIP",
+        price: "120",
+        type: "VIP",
+        available: 300,
+        total: 300,
+      },
+      {
+        id: generateRandomId(),
+        name: "VVIP",
+        price: "250",
+        type: "VVIP",
+        available: 100,
+        total: 100,
+      },
+    ],
+    soldOut: false,
+  },
 ];
+
 export const mockUsers: User[] = [
   {
     id: generateRandomId(),

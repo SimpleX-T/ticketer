@@ -1,5 +1,5 @@
 import { FaTicket } from "react-icons/fa6";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../contexts/AuthContext";
 import React, { FormEvent, useState } from "react";
 
@@ -9,8 +9,10 @@ export default function Login() {
     password: "",
   });
   const [formError, setFormError] = useState("");
-  const { handleLogin, isLoading, error, setError } = useAuthContext();
-
+  const { handleLogin, isLoading, error, setError, isAuthenticated } =
+    useAuthContext();
+  const location = useLocation();
+  const { from } = (location.state as { from: string }) || { from: "/" };
   const login = async (e: FormEvent) => {
     e.preventDefault();
     setFormError("");
@@ -22,6 +24,10 @@ export default function Login() {
 
     handleLogin(form.email, form.password);
   };
+
+  if (isAuthenticated) {
+    return <Navigate to={from} replace />;
+  }
 
   return (
     <section className="min-h-screen w-full bg-gradient-to-bl from-secondary-200 to-primary grid place-items-center">

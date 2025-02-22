@@ -68,14 +68,13 @@ const AuthProvider = ({ children }: AppProviderProps) => {
   }, []);
 
   const handleLogin = async (email: string, password: string) => {
-    console.log(email, password);
     setError({ login: { message: "" } });
     if (!password)
       return setError({ login: { message: "Please input your password" } });
 
     setIsLoading(true);
     const user = mockUsers.find((user) => user.email === email);
-    console.log(user);
+
     if (!user) {
       setError({
         login: {

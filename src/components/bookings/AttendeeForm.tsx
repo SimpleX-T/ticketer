@@ -11,7 +11,7 @@ export const AttendeeForm: React.FC<AttendeeFormProps> = ({
   onSubmit,
 }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { userTickets, addTicket } = useAppContext();
+  const { addTicket } = useAppContext();
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -46,8 +46,6 @@ export const AttendeeForm: React.FC<AttendeeFormProps> = ({
     if (validateForm()) {
       addTicket(ticketData);
       onSubmit();
-      console.log(ticketData);
-      console.log(userTickets);
     }
   };
 

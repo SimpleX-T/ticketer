@@ -1,15 +1,15 @@
 import {
   createContext,
   ReactNode,
+  SetStateAction,
   useContext,
-  useEffect,
   useState,
 } from "react";
 import { UserTicketData } from "../types";
 
 interface AppContextType {
   userTickets: UserTicketData[];
-  addTicket: (ticket: UserTicketData) => void;
+  addTicket: (ticket: UserTicketData) => SetStateAction<void>;
   removeTicket: (id: string) => void;
 }
 
@@ -28,14 +28,9 @@ interface AppProviderProps {
 const AppProvider = ({ children }: AppProviderProps) => {
   const [userTickets, setUserTickets] = useState<UserTicketData[]>([]);
 
-  const addTicket = (ticket: UserTicketData) => () => {
-    console.log("Adding ticket: ", ticket);
+  const addTicket = (ticket: UserTicketData) => {
     setUserTickets((prev) => [...prev, ticket]);
   };
-
-  useEffect(() => {
-    console.log("User Tickets: ", userTickets);
-  }, [userTickets]);
 
   const removeTicket = (id: string) => {
     setUserTickets(userTickets.filter((ticket) => ticket.ticketId !== id));

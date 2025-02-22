@@ -40,10 +40,6 @@ export default function BookingPage() {
     }
   }, [step]);
 
-  // const generateTicketId = (): string => {
-  //   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  // };
-
   return (
     <div className="select-none min-h-screen relative bg-primary overflow-hidden w-full flex items-center justify-center">
       <div className="absolute w-full max-w-7xl rounded-full h-52 bg-primary-100 blur-[80px] bottom-0 translate-y-1/2" />

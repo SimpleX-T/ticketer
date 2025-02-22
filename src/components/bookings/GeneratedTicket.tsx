@@ -11,8 +11,6 @@ export const GeneratedTicket: React.FC<GeneratedTicketProps> = ({
   const ticketRef = useRef<HTMLDivElement>(null);
 
   const onDownloadTicket = async () => {
-    console.log(ticketRef.current);
-
     if (ticketRef.current === null) return;
     toPng(ticketRef.current, { quality: 1.0, pixelRatio: 3 }).then(
       (dataUrl) => {
@@ -109,7 +107,7 @@ export const GeneratedTicket: React.FC<GeneratedTicketProps> = ({
 
         <div className="mt-8 flex items-center justify-center">
           <Barcode
-            value={ticketData.ticketId}
+            value={ticketData.ticketId as string}
             height={50}
             width={1}
             displayValue={true}
