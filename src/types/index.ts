@@ -17,8 +17,7 @@ export interface UserTicketData {
   profileImage: string | null;
   specialRequest: string;
   ticketId: string | number;
-  eventId: string;
-  eventName: string;
+  event: Event;
 }
 
 export interface TicketSelectionProps {
@@ -40,7 +39,7 @@ export interface AttendeeFormProps {
 
 export interface GeneratedTicketProps {
   ticketData: UserTicketData;
-  onBookAnother: () => void;
+  onBookAnother?: () => void;
 }
 
 export interface User {

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { TicketSelectionProps } from "../../types";
 import { FaCalendar } from "react-icons/fa6";
 
@@ -46,7 +47,7 @@ export const TicketSelection: React.FC<TicketSelectionProps> = ({
               }
             `}
             >
-              <div className="text-white font-bold">{ticket.price}</div>
+              <div className="text-white font-bold">${ticket.price}</div>
               <div className="text-white text-sm">{ticket.name}</div>
               <div className="text-teal-300 text-xs">
                 {ticket.available}/{ticket.total}
@@ -69,9 +70,12 @@ export const TicketSelection: React.FC<TicketSelectionProps> = ({
       </select>
 
       <div className="flex items-center justify-between gap-4">
-        <button className="w-1/2 py-2 text-white cursor-pointer border border-secondary rounded-md">
+        <Link
+          to="/"
+          className="w-1/2 py-2 flex items-center justify-center text-white cursor-pointer border border-secondary rounded-md"
+        >
           Cancel
-        </button>
+        </Link>
 
         <button
           onClick={onNext}

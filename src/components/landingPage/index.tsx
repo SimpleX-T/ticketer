@@ -16,21 +16,6 @@ const Home = () => {
     event.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // const handleBuyTicket = (
-  //   event: Event,
-  //   ticketType: "REGULAR" | "VIP" | "VVIP"
-  // ) => {
-  //   addTicket({
-  //     id: `${event.id}-${Date.now()}`,
-  //     name: event.name,
-  //     ticketType: event.ticketsType,
-  //     type: ticketType,
-  //     eventName: event.name,
-  //     eventId: event.id,
-  //     total: parseInt(event.ticketsType[ticketType]),
-  //   });
-  // };
-
   return (
     <div className="min-h-screen bg-white w-full">
       {/* Hero Section */}
@@ -124,7 +109,10 @@ const Home = () => {
       </section>
 
       {/* Events Bento Grid */}
-      <section className="py-20 bg-primary container relative mx-auto px-4 z-50">
+      <section
+        id="events"
+        className="py-20 bg-primary container relative mx-auto px-4 z-50"
+      >
         <div className="mb-12 z-50">
           <h2 className="text-4xl font-bold text-center text-secondary mb-6">
             Upcoming Events

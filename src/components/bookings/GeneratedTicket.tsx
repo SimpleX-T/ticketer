@@ -46,14 +46,14 @@ export const GeneratedTicket: React.FC<GeneratedTicketProps> = ({
         <div className="border border-secondary w-full rounded-xl p-4">
           <div className="mb-6 text-center">
             <h2 className="text-5xl font-semibold font-[Road_Rage] text-white mb-2">
-              Techember Fest '25
+              {ticketData.event.name}
             </h2>
             <address className="text-white text-xs not-italic">
-              📍 04 Rumens road, Ikoyi, Lagos
+              📍 {ticketData.event.location}
             </address>
             <p className="text-white text-xs">
-              <BiCalendar className="inline-block mr-2" /> March 15, 2025 | 7:00
-              PM
+              <BiCalendar className="inline-block mr-2" />{" "}
+              {ticketData.event.date}
             </p>
           </div>
 

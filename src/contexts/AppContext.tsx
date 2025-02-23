@@ -26,10 +26,13 @@ interface AppProviderProps {
 }
 
 const AppProvider = ({ children }: AppProviderProps) => {
-  const [userTickets, setUserTickets] = useState<UserTicketData[]>([]);
+  const [userTickets, setUserTickets] = useState<UserTicketData[]>(() =>
+    JSON.parse(localStorage.getItem("userTickets") || "[]")
+  );
 
   const addTicket = (ticket: UserTicketData) => {
     setUserTickets((prev) => [...prev, ticket]);
+    localStorage.setItem("userTickets", JSON.stringify(userTickets));
   };
 
   const removeTicket = (id: string) => {

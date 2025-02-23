@@ -13,6 +13,7 @@ export default function Login() {
     useAuthContext();
   const location = useLocation();
   const { from } = (location.state as { from: string }) || { from: "/" };
+
   const login = async (e: FormEvent) => {
     e.preventDefault();
     setFormError("");

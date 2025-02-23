@@ -21,8 +21,7 @@ export default function BookingPage() {
     profileImage: null,
     specialRequest: "",
     ticketId: "",
-    eventName: event?.name || "",
-    eventId: event?.id || "",
+    event: event!,
   });
   const [stepTitle, setStepTitle] = useState<string>("Ticket Selection");
 
@@ -106,8 +105,7 @@ export default function BookingPage() {
                     profileImage: null,
                     specialRequest: "",
                     ticketId: "",
-                    eventId: "",
-                    eventName: "",
+                    event: {} as Event,
                   });
                   setStep(1);
                 }}
