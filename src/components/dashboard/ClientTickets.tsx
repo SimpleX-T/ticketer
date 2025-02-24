@@ -2,10 +2,11 @@ import { Link } from "react-router-dom";
 import { useAppContext } from "../../contexts/AppContext";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { UserTicketData } from "../../types";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { BiCalendar } from "react-icons/bi";
 import Barcode from "react-barcode";
+import { FaEllipsisVertical } from "react-icons/fa6";
 
 const ClientTickets = () => {
   const { user } = useAuthContext();
@@ -36,7 +37,7 @@ const ClientTickets = () => {
       {/* Tickets List */}
       <div className="mt-6">
         <h2 className="text-xl font-semibold text-secondary">Booked Tickets</h2>
-        <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-8 items-center">
+        <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-4 items-center">
           {userTickets.length > 0 ? (
             userTickets.map((ticket) => (
               <TicketCard ticket={ticket} onSelect={handleSelectTicket} />
@@ -167,13 +168,37 @@ const TicketCard = ({
   ticket: UserTicketData;
   onSelect: (ticket: UserTicketData) => void;
 }) => {
+  const [showOptions, setShowOptions] = useState(false);
+  const optionRef = useRef<HTMLDivElement | null>(null);
+
+  const handleShowOption = () => {
+    setShowOptions(true);
+  };
+
+  const handleViewTicket = () => {
+    onSelect(ticket);
+    setShowOptions(false);
+  };
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (optionRef.current && !optionRef.current.contains(e.target as Node)) {
+      setShowOptions(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div
-      onClick={() => onSelect(ticket)}
       key={ticket.ticketId}
-      className="bg-primary flex rounded-lg overflow-hidden h-32 shadow-md mt-4"
+      className="bg-primary relative flex rounded-lg -hidden h-36 shadow-md mt-4"
     >
-      <div className="aspect-square min-h-full overflow-hidden rounded-r-lg">
+      <div className="aspect-square min-h-full overflow-hidden rounded-lg">
         <img
           src={ticket.event.image}
           alt={ticket.event.name}
@@ -181,15 +206,44 @@ const TicketCard = ({
         />
       </div>
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-secondary">
+        <h3 className="text-sm md:text-lg mb-2 font-semibold text-secondary">
           {ticket.event.name}
         </h3>
-        <p className="text-secondary">
+        <p className="text-secondary text-xs md:text-sm mb-1">
           <strong>Tickets for:</strong> {ticket.ticketCount}
         </p>
-        <p className="text-secondary">
+        <p className="text-secondary text-xs md:text-sm mb-1">
           <strong>Type:</strong> {ticket.ticketType?.name}
         </p>
+      </div>
+
+      {/* Option button */}
+      <div
+        className="absolute top-4 right-4 flex items-center border border-secondary-100 rounded-sm"
+        ref={optionRef}
+      >
+        <button
+          className="flex items-center justify-center rounded-sm cursor-pointer p-1"
+          onClick={handleShowOption}
+        >
+          <FaEllipsisVertical className="text-secondary text-sm" />
+        </button>
+
+        <ul
+          className={`${
+            showOptions ? "flex" : "hidden"
+          } flex-col text-center border-secondary-100 border rounded-sm bg-secondary-200 absolute top-3/2 right-3/5 w-24`}
+        >
+          <button
+            className="text-secondary text-xs cursor-pointer hover:bg-secondary/20 transition-colors duration-300 p-2"
+            onClick={handleViewTicket}
+          >
+            View Ticket
+          </button>
+          <button className="text-secondary text-xs cursor-pointer hover:bg-secondary/20 transition-colors duration-300 p-2">
+            Delete Ticket
+          </button>
+        </ul>
       </div>
     </div>
   );

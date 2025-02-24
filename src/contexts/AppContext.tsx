@@ -10,13 +10,13 @@ import { UserTicketData } from "../types";
 interface AppContextType {
   userTickets: UserTicketData[];
   addTicket: (ticket: UserTicketData) => SetStateAction<void>;
-  removeTicket: (id: string) => void;
+  deleteTicket: (id: string) => void;
 }
 
 const initialState: AppContextType = {
   userTickets: [],
   addTicket: () => () => {},
-  removeTicket: () => {},
+  deleteTicket: () => {},
 };
 
 const AppContext = createContext<AppContextType>(initialState);
@@ -32,17 +32,22 @@ const AppProvider = ({ children }: AppProviderProps) => {
 
   const addTicket = (ticket: UserTicketData) => {
     setUserTickets((prev) => [...prev, ticket]);
-    localStorage.setItem("userTickets", JSON.stringify(userTickets));
+    localStorage.setItem(
+      "userTickets",
+      JSON.stringify([...userTickets, ticket])
+    );
   };
 
-  const removeTicket = (id: string) => {
-    setUserTickets(userTickets.filter((ticket) => ticket.ticketId !== id));
+  const deleteTicket = (ticketId: string | number) => {
+    const newTickets = userTickets.filter((el) => el.ticketId !== ticketId);
+    setUserTickets(newTickets);
+    localStorage.setItem("userTickets", JSON.stringify(newTickets));
   };
 
   const value: AppContextType = {
     userTickets,
     addTicket,
-    removeTicket,
+    deleteTicket,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
