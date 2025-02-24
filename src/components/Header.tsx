@@ -29,6 +29,7 @@ export default function Header() {
       </nav>
       <Link
         to="/dashboard"
+        replace
         className={`relative border  text-secondary px-3 py-1 rounded-full ${
           addEffect ? "bg-white/40" : "bg-primary-300"
         }`}

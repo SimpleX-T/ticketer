@@ -10,7 +10,7 @@ import { UserTicketData } from "../types";
 interface AppContextType {
   userTickets: UserTicketData[];
   addTicket: (ticket: UserTicketData) => SetStateAction<void>;
-  deleteTicket: (id: string) => void;
+  deleteTicket: (id: string | number) => void;
 }
 
 const initialState: AppContextType = {

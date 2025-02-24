@@ -7,6 +7,7 @@ import Login from "./pages/auth/login";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AppProvider } from "./contexts/AppContext";
 import UserDashboard from "./pages/dashboard";
+import CreateEvent from "./components/createEvent";
 
 const router = createBrowserRouter([
   {
@@ -42,6 +43,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <UserDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/create-event",
+        element: (
+          <ProtectedRoute>
+            <CreateEvent />
           </ProtectedRoute>
         ),
       },

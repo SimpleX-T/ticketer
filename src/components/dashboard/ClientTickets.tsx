@@ -6,11 +6,11 @@ import { useEffect, useRef, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { BiCalendar } from "react-icons/bi";
 import Barcode from "react-barcode";
-import { FaEllipsisVertical } from "react-icons/fa6";
+import { FaEllipsisVertical, FaPlus } from "react-icons/fa6";
 
 const ClientTickets = () => {
   const { user } = useAuthContext();
-  const { userTickets } = useAppContext();
+  const { userTickets, deleteTicket } = useAppContext();
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [selectedTicket, setSelectedTicket] = useState<UserTicketData>(
     userTickets[0]
@@ -19,6 +19,11 @@ const ClientTickets = () => {
   const handleSelectTicket = (ticket: UserTicketData) => {
     setSelectedTicket(ticket);
     setOpenModal(true);
+  };
+
+  const handleDeleteTicket = (ticketId: string | number) => {
+    if (!ticketId) return;
+    deleteTicket(ticketId);
   };
 
   return (
@@ -36,11 +41,26 @@ const ClientTickets = () => {
 
       {/* Tickets List */}
       <div className="mt-6">
-        <h2 className="text-xl font-semibold text-secondary">Booked Tickets</h2>
-        <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-4 items-center">
+        <div className="flex items-center mb-4 justify-between">
+          <h2 className="text-lg md:text-xl font-semibold text-secondary mr-auto">
+            Booked Tickets
+          </h2>
+          <Link
+            to="/create-event"
+            className="flex items-center gap-1 p-2 rounded-sm cursor-pointer hover:bg-secondary/70 transition-colors duration-150 bg-secondary text-white text-xs"
+          >
+            <FaPlus />
+            <span>Create Event</span>
+          </Link>
+        </div>
+        <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-4 relative md:p-2 items-start">
           {userTickets.length > 0 ? (
             userTickets.map((ticket) => (
-              <TicketCard ticket={ticket} onSelect={handleSelectTicket} />
+              <TicketCard
+                ticket={ticket}
+                onSelect={handleSelectTicket}
+                deleteTicket={handleDeleteTicket}
+              />
             ))
           ) : (
             <p className="text-secondary mt-4 text-center">
@@ -164,11 +184,14 @@ export default ClientTickets;
 const TicketCard = ({
   ticket,
   onSelect,
+  deleteTicket,
 }: {
   ticket: UserTicketData;
   onSelect: (ticket: UserTicketData) => void;
+  deleteTicket: (id: string | number) => void;
 }) => {
   const [showOptions, setShowOptions] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const optionRef = useRef<HTMLDivElement | null>(null);
 
   const handleShowOption = () => {
@@ -193,6 +216,10 @@ const TicketCard = ({
     };
   }, []);
 
+  const handleOpenDeleteModal = () => {
+    setShowDeleteModal(true);
+  };
+
   return (
     <div
       key={ticket.ticketId}
@@ -205,7 +232,8 @@ const TicketCard = ({
           className="w-full h-full object-cover"
         />
       </div>
-      <div className="p-4">
+
+      <div className="p-4 pr-8">
         <h3 className="text-sm md:text-lg mb-2 font-semibold text-secondary">
           {ticket.event.name}
         </h3>
@@ -232,7 +260,7 @@ const TicketCard = ({
         <ul
           className={`${
             showOptions ? "flex" : "hidden"
-          } flex-col text-center border-secondary-100 border rounded-sm bg-secondary-200 absolute top-3/2 right-3/5 w-24`}
+          } flex-col text-center border-secondary-100 border rounded-sm bg-secondary-200 absolute top-3/2 right-1/5 w-28`}
         >
           <button
             className="text-secondary text-xs cursor-pointer hover:bg-secondary/20 transition-colors duration-300 p-2"
@@ -240,10 +268,70 @@ const TicketCard = ({
           >
             View Ticket
           </button>
-          <button className="text-secondary text-xs cursor-pointer hover:bg-secondary/20 transition-colors duration-300 p-2">
+          <button
+            className="text-secondary text-xs cursor-pointer hover:bg-secondary/20 transition-colors duration-300 p-2"
+            onClick={handleOpenDeleteModal}
+          >
             Delete Ticket
           </button>
         </ul>
+      </div>
+
+      {showDeleteModal && (
+        <DeleteModal
+          onclick={() => deleteTicket(ticket.ticketId)}
+          onclose={() => setShowDeleteModal(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+const DeleteModal = ({
+  onclick,
+  onclose,
+}: {
+  onclick: () => void;
+  onclose: () => void;
+}) => {
+  return (
+    <div>
+      <div className="fixed inset-0 z-50 w-full h-full bg-primary/20 backdrop-blur-md flex items-center justify-center">
+        <div className="w-full flex items-center justify-center h-full relative">
+          <div className="py-3 mb-8 w-full max-w-[400px] mx-auto mt-20 border border-secondary bg-secondary-300 rounded-md">
+            <div className="w-full">
+              <div className="mb-6 text-center">
+                <h2 className="text-5xl font-semibold font-[Road_Rage] text-white mb-2">
+                  Delete Ticket
+                </h2>
+              </div>
+
+              <div className="text-center px-6 mb-2">
+                <p className="text-white text-md">
+                  Are you sure you want to delete this ticket?
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-8 flex items-center justify-end pr-6 gap-4">
+              <button
+                onClick={onclose}
+                className="flex items-center justify-center border text-secondary rounded-sm border-secondary p-2 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  onclick();
+                  onclose();
+                }}
+                className="flex items-center justify-center border border-secondary rounded-sm bg-red-200 text-primary-200 p-2 cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -3,8 +3,8 @@ import { ChangeEventHandler } from "react";
 export interface TicketType {
   id: number | string;
   name: string;
-  price: string;
-  type: "REGULAR" | "VIP" | "VVIP";
+  price: number;
+  type: "REGULAR" | "VIP" | "VVIP" | string;
   available: number;
   total: number;
 }
@@ -47,6 +47,7 @@ export interface User {
   firstname: string;
   lastname: string;
   email: string;
+  role?: "admin" | "user" | "organizer";
 }
 
 export interface Event {
@@ -58,4 +59,8 @@ export interface Event {
   image: string;
   ticketsType: TicketType[];
   soldOut: boolean;
+  organizerId: string;
+  createdAt: string;
+  maxTicketsPerUser: number;
+  category: string;
 }
