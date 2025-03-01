@@ -5,113 +5,214 @@ import {
   useEffect,
   useState,
 } from "react";
-// import { generateRandomId } from "../utils/helpers";
-import { User } from "../types";
-import { mockUsers } from "../utils/constants";
+import { auth } from "../services/firebase";
+import { AuthArgs, User } from "../types";
+import {
+  login,
+  signup,
+  logout,
+  getCurrentUser,
+  onAuthStateChanged,
+} from "../hooks/useFirebaseAuth";
 
-interface AuthError {
-  login?: { message: string };
-  signup?: { message: string };
-}
+type AuthErrorType = string | null;
 
 interface AuthContextType {
-  user: User;
+  user: User | null;
   isAuthenticated: boolean;
-  handleLogin: (email: string, password: string) => void;
+  handleLogin: (email: string, password: string) => Promise<void>;
+  handleSignup: (user: AuthArgs) => Promise<void>;
+  handleLogout: () => Promise<void>;
   isLoading: boolean;
-  error: AuthError;
-  setError: (error: AuthError) => void;
+  error: AuthErrorType;
+  clearError: () => void;
 }
 
 const initialState: AuthContextType = {
-  user: {
-    id: "",
-    firstname: "",
-    lastname: "",
-    email: "",
-  },
+  user: null,
   isAuthenticated: false,
-  handleLogin: () => {},
-  isLoading: false,
-  error: {
-    login: { message: "" },
-    signup: { message: "" },
-  },
-  setError: () => {},
+  handleLogin: async () => {},
+  handleSignup: async () => {},
+  handleLogout: async () => {},
+  isLoading: true, // Start with loading true to show loading state on initial auth check
+  error: null,
+  clearError: () => {},
 };
 
 const AuthContext = createContext<AuthContextType>(initialState);
 
-interface AppProviderProps {
+interface AuthProviderProps {
   children: ReactNode;
 }
 
-const USER_KEY = "currUser";
-const AUTHENTICATED_KEY = "userIsAuthenticated";
-
-const AuthProvider = ({ children }: AppProviderProps) => {
-  const [user, setUser] = useState<User>(initialState.user);
+const AuthProvider = ({ children }: AuthProviderProps) => {
+  const [user, setUser] = useState<User | null>(initialState.user);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
     initialState.isAuthenticated
   );
   const [isLoading, setIsLoading] = useState(initialState.isLoading);
-  const [error, setError] = useState<AuthError>(initialState.error);
+  const [error, setError] = useState<AuthErrorType>(initialState.error);
 
+  // Listen for Firebase auth state changes
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem(AUTHENTICATED_KEY);
-    if (!isAuthenticated) return;
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setIsLoading(true);
 
-    const user = localStorage.getItem(USER_KEY) || "";
-    if (!user) return;
-    setUser(JSON.parse(user));
-    setIsAuthenticated(Boolean(localStorage.getItem(AUTHENTICATED_KEY)));
+      try {
+        if (firebaseUser) {
+          const userData = await getCurrentUser(firebaseUser);
+
+          if (userData) {
+            setUser(userData);
+            setIsAuthenticated(true);
+          } else {
+            // User exists in Firebase Auth but not in Firestore
+            await logout();
+            setUser(null);
+            setIsAuthenticated(false);
+          }
+        } else {
+          setUser(null);
+          setIsAuthenticated(false);
+        }
+      } catch (err) {
+        console.error("Auth state change error:", err);
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
 
+  const clearError = () => setError(null);
+
   const handleLogin = async (email: string, password: string) => {
-    setError({ login: { message: "" } });
-    if (!password)
-      return setError({ login: { message: "Please input your password" } });
+    clearError();
 
-    setIsLoading(true);
-    const user = mockUsers.find((user) => user.email === email);
-
-    if (!user) {
-      setError({
-        login: {
-          message:
-            "User with email not found, make sure the email is registered on our system.",
-        },
-      });
-      return setIsLoading(false);
+    //Rechecking for stray-errors
+    if (!email) {
+      setError("Please enter your email");
+      return;
+    }
+    if (!password) {
+      setError("Please enter your password");
+      return;
     }
 
-    setTimeout(() => {
-      // simulating a promise
-      setUser(user);
-      localStorage.setItem(USER_KEY, JSON.stringify(user));
-      localStorage.setItem(AUTHENTICATED_KEY, "true");
+    try {
+      setIsLoading(true);
+      const userData = await login(email, password);
+      setUser(userData);
+      setIsAuthenticated(true);
+    } catch (err) {
+      let errorMessage = "Login failed";
+
+      if (err instanceof Error) {
+        // Handle common Firebase auth errors with user-friendly messages
+        if (
+          err.message.includes("user-not-found") ||
+          err.message.includes("wrong-password")
+        ) {
+          errorMessage = "Invalid email or password";
+        } else if (err.message.includes("too-many-requests")) {
+          errorMessage =
+            "Too many failed login attempts. Please try again later";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+
+      setError(errorMessage);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
+  };
+
+  const handleSignup = async (userData: AuthArgs) => {
+    clearError();
+
+    // Revalidate user data
+    if (!userData.email) {
+      setError("Please enter your email");
+      return;
+    }
+    if (!userData.password) {
+      setError("Please enter a password");
+      return;
+    }
+    if (userData.password !== userData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+    if (!userData.firstname || !userData.lastname) {
+      setError("Please provide your full name");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const newUser = await signup(userData);
+      setUser(newUser as User);
+      setIsAuthenticated(true);
+    } catch (err) {
+      let errorMessage = "Signup failed";
+
+      if (err instanceof Error) {
+        // Handle common Firebase auth errors with user-friendly messages
+        if (err.message.includes("email-already-in-use")) {
+          errorMessage = "This email is already registered";
+        } else if (err.message.includes("weak-password")) {
+          errorMessage = "Password is too weak. Use at least 6 characters";
+        } else if (err.message.includes("invalid-email")) {
+          errorMessage = "Please provide a valid email address";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      setIsLoading(true);
+      await logout();
+      setUser(null);
+      setIsAuthenticated(false);
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const value = {
     user,
     isAuthenticated,
     handleLogin,
+    handleSignup,
+    handleLogout,
     isLoading,
     error,
-    setError,
+    clearError,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-function useAuthContext() {
+function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuthContext must be used within an AppProvider");
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
 
-export { AuthProvider, useAuthContext };
+export { AuthProvider, useAuth };

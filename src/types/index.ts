@@ -1,23 +1,46 @@
 import { ChangeEventHandler } from "react";
 
-export interface TicketType {
-  id: number | string;
-  name: string;
-  price: number;
-  type: "REGULAR" | "VIP" | "VVIP" | string;
-  available: number;
-  total: number;
+export interface User {
+  id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  role?: "admin" | "user" | "organizer";
+  profileImage?: string | null;
+  createdAt: string;
 }
 
-export interface UserTicketData {
-  userName: string;
-  userEmail: string;
-  ticketType: TicketType | null;
-  ticketCount: number;
-  profileImage: string | null;
-  specialRequest: string;
-  ticketId: string | number;
-  event: Event;
+export interface TicketType {
+  id: string;
+  name: string;
+  price: number;
+  type: string;
+  available: number;
+  total: number;
+  description?: string;
+  benefits?: string[];
+}
+
+export interface Ticket {
+  id: string;
+  ticketTypeId: string;
+  eventId: string;
+  userId: string;
+  purchaseDate: string;
+  status: TicketStatus;
+  price: number;
+  ticketCode: string;
+  isTransferred: boolean;
+  transferredTo?: string;
+  specialRequests?: string;
+}
+
+export enum TicketStatus {
+  RESERVED = "RESERVED",
+  PURCHASED = "PURCHASED",
+  USED = "USED",
+  CANCELLED = "CANCELLED",
+  REFUNDED = "REFUNDED",
 }
 
 export interface TicketSelectionProps {
@@ -31,23 +54,22 @@ export interface TicketSelectionProps {
 
 export interface AttendeeFormProps {
   event: Event | undefined;
-  ticketData: UserTicketData;
-  setTicketData: React.Dispatch<React.SetStateAction<UserTicketData>>;
+  ticketData: Ticket;
+  setTicketData: React.Dispatch<React.SetStateAction<Ticket>>;
   onBack: () => void;
   onSubmit: () => void;
 }
 
 export interface GeneratedTicketProps {
-  ticketData: UserTicketData;
+  ticketData: Ticket;
   onBookAnother?: () => void;
 }
 
-export interface User {
-  id: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-  role?: "admin" | "user" | "organizer";
+export enum EventStatus {
+  DRAFT = "DRAFT",
+  PUBLISHED = "PUBLISHED",
+  CANCELLED = "CANCELLED",
+  COMPLETED = "COMPLETED",
 }
 
 export interface Event {
@@ -57,10 +79,40 @@ export interface Event {
   location: string;
   description: string;
   image: string;
-  ticketsType: TicketType[];
+  ticketTypes: TicketType[];
   soldOut: boolean;
   organizerId: string;
   createdAt: string;
   maxTicketsPerUser: number;
   category: string;
+  status: EventStatus;
+  totalCapacity: number;
+  ticketsSold: number;
+}
+
+export interface AuthArgs {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  firstname: string;
+  lastname: string;
+}
+
+export interface TicketPurchaseData {
+  eventId: string;
+  ticketTypeId: string;
+  quantity: number;
+  specialRequests?: string;
+  userId: string;
+}
+export interface TicketWithDetails {
+  id: string;
+  ticketCode: string;
+  eventName: string;
+  eventDate: string;
+  eventLocation: string;
+  ticketType: string;
+  price: number;
+  status: TicketStatus;
+  purchaseDate: string;
 }

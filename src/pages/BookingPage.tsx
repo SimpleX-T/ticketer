@@ -5,17 +5,17 @@ import { GeneratedTicket } from "../components/bookings/GeneratedTicket";
 import { AttendeeForm } from "../components/bookings/AttendeeForm";
 import { useParams } from "react-router-dom";
 import { mockEvents } from "../utils/constants";
-import { useAuthContext } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function BookingPage() {
   const params = useParams<{ eventId: string }>();
   const event = mockEvents.find((event: Event) => event.id === params.eventId);
-  const { user } = useAuthContext();
+  const { user } = useAuth();
 
   const [step, setStep] = useState<number>(1);
   const [ticketData, setTicketData] = useState<UserTicketData>({
-    userName: user.firstname + " " + user.lastname,
-    userEmail: user.email,
+    userName: user?.firstname + " " + user?.lastname,
+    userEmail: user ? user.email : "",
     ticketType: null,
     ticketCount: 1,
     profileImage: null,

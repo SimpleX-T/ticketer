@@ -1,29 +1,29 @@
 import { FaTicket } from "react-icons/fa6";
 import { Link, Navigate, useLocation } from "react-router-dom";
-import { useAuthContext } from "../../contexts/AuthContext";
-import React, { FormEvent, useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { useForm } from "react-hook-form";
+
+// Define a type for login form data
+interface LoginFormData {
+  email: string;
+  password: string;
+}
 
 export default function Login() {
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
-  const [formError, setFormError] = useState("");
-  const { handleLogin, isLoading, error, setError, isAuthenticated } =
-    useAuthContext();
+  const { handleLogin, isLoading, error, isAuthenticated, clearError } =
+    useAuth();
   const location = useLocation();
   const { from } = (location.state as { from: string }) || { from: "/" };
 
-  const login = async (e: FormEvent) => {
-    e.preventDefault();
-    setFormError("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>();
 
-    if (!form.password) setFormError("Please input your password");
-    if (!form.email) setFormError("Please input your registered email");
-    if (!form.email && !form.password)
-      return setFormError("The email and password fields are required");
-
-    handleLogin(form.email, form.password);
+  const login = async (data: LoginFormData) => {
+    // Using our improved context which handles all validation
+    handleLogin(data.email, data.password);
   };
 
   if (isAuthenticated) {
@@ -47,7 +47,7 @@ export default function Login() {
               "linear-gradient(var(--color-primary-100), var(--color-secondary))",
             borderImageSlice: 20,
           }}
-          onSubmit={login}
+          onSubmit={handleSubmit(login)}
         >
           <div className="relative">
             <label
@@ -60,14 +60,21 @@ export default function Login() {
             <input
               type="email"
               placeholder="user@example.com"
-              value={form.email}
-              onChange={(e) => {
-                setForm((prev) => ({ ...prev, email: e.target.value }));
-                setFormError("");
-                setError({ login: { message: "" } });
-              }}
+              {...register("email", {
+                required: "Please input your email",
+                pattern: {
+                  value: /\S+@\S+\.\S+/,
+                  message: "Please input a valid email",
+                },
+                onChange: () => error && clearError(),
+              })}
               className="px-3 w-full py-2 border rounded-md border-secondary placeholder:text-secondary-100 text-secondary outline-none text-sm"
             />
+            {errors.email && (
+              <span className="text-[10px] text-center text-red-500">
+                {errors.email.message}
+              </span>
+            )}
           </div>
 
           <div className="relative">
@@ -81,37 +88,48 @@ export default function Login() {
             <input
               type="password"
               placeholder="**********"
-              value={form.password}
-              onChange={(e) => {
-                setForm((prev) => ({ ...prev, password: e.target.value }));
-                setFormError("");
-                setError({ login: { message: "" } });
-              }}
+              {...register("password", {
+                required: "Please input your password",
+                onChange: () => error && clearError(),
+              })}
               className="px-3 w-full py-2 border rounded-md border-secondary placeholder:text-secondary-100 text-secondary outline-none text-sm"
             />
+            {errors.password && (
+              <span className="text-[10px] text-center text-red-500">
+                {errors.password.message}
+              </span>
+            )}
           </div>
 
-          {error.login?.message && (
-            <ErrorLabel title="Login Error" message={error.login.message} />
+          {/* Display Firebase auth errors */}
+          {error && (
+            <span className="text-xs text-center block text-red-500">
+              {error}
+            </span>
           )}
-
-          {formError && <ErrorLabel message={formError} />}
 
           <button
             type="submit"
             className="px-3 mt-4 w-full py-2 border rounded-md border-secondary text-secondary outline-none text-sm flex items-center justify-center gap-4 cursor-pointer hover:bg-primary transition-colors duration-300"
             disabled={isLoading}
           >
-            {isLoading && <FaTicket className="animate-bounce" size={20} />}
-            Login
+            {isLoading ? (
+              <FaTicket className="animate-bounce" size={20} />
+            ) : (
+              "Login"
+            )}
           </button>
         </form>
 
         <div>
           <p className="text-xs text-secondary text-center">
             Don&apos;t have an account yet?{" "}
-            <Link to="/register" className="font-semibold hover:underline">
-              Create
+            <Link
+              to="/signup"
+              className="font-semibold hover:underline"
+              replace
+            >
+              create
             </Link>{" "}
             a new account.
           </p>
@@ -120,17 +138,3 @@ export default function Login() {
     </section>
   );
 }
-
-const ErrorLabel: React.FC<{ title?: string; message: string }> = ({
-  title,
-  message,
-}) => {
-  return (
-    <div className="border border-red-400 rounded-md bg-red-200 p-2">
-      {title && (
-        <p className="text-md mb-2 text-red-600 font-medium">{title}</p>
-      )}
-      <span className="text-xs text-red-500">{message}</span>
-    </div>
-  );
-};
