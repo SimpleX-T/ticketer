@@ -1,11 +1,10 @@
 import {
   collection,
   doc,
-  setDoc,
+  // setDoc,
   updateDoc,
   getDoc,
   getDocs,
-  query,
   writeBatch,
 } from "firebase/firestore";
 import { db } from "../services/firebase";
@@ -15,7 +14,7 @@ import { Event, EventStatus, TicketType, User } from "../types";
 export const createEvent = async (
   eventData: Omit<Event, "id" | "createdAt" | "ticketsSold" | "soldOut">,
   currentUser: User
-) => {
+): Promise<Event> => {
   try {
     // Verify user is an organizer
     if (currentUser.role !== "organizer" && currentUser.role !== "admin") {
@@ -24,6 +23,7 @@ export const createEvent = async (
 
     // Create event reference with auto-generated ID
     const eventRef = doc(collection(db, "events"));
+    const ticketTypesRef = collection(eventRef, "ticketTypes");
 
     // Calculate total capacity from ticket types
     const totalCapacity = eventData.ticketTypes.reduce(
@@ -34,40 +34,38 @@ export const createEvent = async (
     // Prepare event data
     const newEvent: Event = {
       ...eventData,
-      id: eventRef.id, // Add ID to the event object
+      id: eventRef.id,
       organizerId: currentUser.id,
       createdAt: new Date().toISOString(),
-      status: EventStatus.DRAFT, // Start as draft
+      status: EventStatus.DRAFT,
       ticketsSold: 0,
       soldOut: false,
       totalCapacity,
     };
 
+    // Start a batch write
+    const batch = writeBatch(db);
+
     // Remove ticketTypes from event object (we'll store them in a subcollection)
     const { ticketTypes, ...eventWithoutTickets } = newEvent;
 
-    // Create event in Firestore
-    await setDoc(eventRef, eventWithoutTickets);
+    // Add event to batch
+    batch.set(eventRef, eventWithoutTickets);
 
-    // Create ticket types as subcollection
-    const batch = writeBatch(db);
-
-    ticketTypes.forEach((ticketType) => {
-      const ticketTypeRef = doc(
-        collection(db, `events/${eventRef.id}/ticketTypes`)
-      );
-      batch.set(ticketTypeRef, {
+    // Add each ticket type to the subcollection
+    for (const ticketType of ticketTypes) {
+      const ticketTypeRef = doc(ticketTypesRef);
+      const ticketTypeData: TicketType = {
         ...ticketType,
         id: ticketTypeRef.id,
-      });
-    });
+      };
+      batch.set(ticketTypeRef, ticketTypeData);
+    }
 
+    // Commit the batch
     await batch.commit();
 
-    return {
-      ...newEvent,
-      id: eventRef.id,
-    };
+    return { ...newEvent, ticketTypes };
   } catch (error) {
     console.error("Error creating event:", error);
     throw error;
@@ -75,30 +73,27 @@ export const createEvent = async (
 };
 
 // Publish an event (change status from DRAFT to PUBLISHED)
-export const publishEvent = async (eventId: string, currentUser: User) => {
+export const publishEvent = async (
+  eventId: string, 
+  currentUser: User
+): Promise<void> => {
   try {
     const eventRef = doc(db, "events", eventId);
-    const eventSnap = await getDoc(eventRef);
+    const eventDoc = await getDoc(eventRef);
 
-    if (!eventSnap.exists()) {
+    if (!eventDoc.exists()) {
       throw new Error("Event not found");
     }
 
-    const eventData = eventSnap.data() as Event;
+    const eventData = eventDoc.data() as Event;
 
-    // Verify ownership or admin rights
-    if (
-      eventData.organizerId !== currentUser.id &&
-      currentUser.role !== "admin"
-    ) {
-      throw new Error("Unauthorized to modify this event");
+    if (eventData.organizerId !== currentUser.id && currentUser.role !== "admin") {
+      throw new Error("Unauthorized to publish this event");
     }
 
     await updateDoc(eventRef, {
       status: EventStatus.PUBLISHED,
     });
-
-    return true;
   } catch (error) {
     console.error("Error publishing event:", error);
     throw error;
@@ -106,25 +101,21 @@ export const publishEvent = async (eventId: string, currentUser: User) => {
 };
 
 // Get event with ticket types
-export const getEventWithTickets = async (eventId: string) => {
+export const getEventWithTickets = async (eventId: string): Promise<Event | null> => {
   try {
-    // Get event data
     const eventRef = doc(db, "events", eventId);
-    const eventSnap = await getDoc(eventRef);
+    const eventDoc = await getDoc(eventRef);
 
-    if (!eventSnap.exists()) {
-      throw new Error("Event not found");
+    if (!eventDoc.exists()) {
+      return null;
     }
 
-    const eventData = eventSnap.data() as Event;
-
-    // Get ticket types
-    const ticketTypesQuery = query(
-      collection(db, `events/${eventId}/ticketTypes`)
-    );
-    const ticketTypesSnap = await getDocs(ticketTypesQuery);
-
-    const ticketTypes = ticketTypesSnap.docs.map((doc) => ({
+    const eventData = eventDoc.data() as Omit<Event, "ticketTypes">;
+    
+    // Get ticket types from subcollection
+    const ticketTypesRef = collection(eventRef, "ticketTypes");
+    const ticketTypesSnapshot = await getDocs(ticketTypesRef);
+    const ticketTypes = ticketTypesSnapshot.docs.map(doc => ({
       ...doc.data(),
       id: doc.id,
     })) as TicketType[];
@@ -132,9 +123,9 @@ export const getEventWithTickets = async (eventId: string) => {
     return {
       ...eventData,
       ticketTypes,
-    };
+    } as Event;
   } catch (error) {
-    console.error("Error fetching event:", error);
+    console.error("Error getting event:", error);
     throw error;
   }
 };
@@ -144,63 +135,53 @@ export const updateEvent = async (
   eventId: string,
   eventData: Partial<Omit<Event, "id" | "createdAt" | "organizerId">>,
   currentUser: User
-) => {
+): Promise<void> => {
   try {
     const eventRef = doc(db, "events", eventId);
-    const eventSnap = await getDoc(eventRef);
+    const eventDoc = await getDoc(eventRef);
 
-    if (!eventSnap.exists()) {
+    if (!eventDoc.exists()) {
       throw new Error("Event not found");
     }
 
-    const existingEvent = eventSnap.data() as Event;
+    const existingEvent = eventDoc.data() as Event;
 
-    // Verify ownership or admin rights
-    if (
-      existingEvent.organizerId !== currentUser.id &&
-      currentUser.role !== "admin"
-    ) {
-      throw new Error("Unauthorized to modify this event");
+    if (existingEvent.organizerId !== currentUser.id && currentUser.role !== "admin") {
+      throw new Error("Unauthorized to update this event");
     }
 
-    // Don't allow changing certain fields
-    const { id, createdAt, organizerId, ticketTypes, ...allowedUpdates } =
-      eventData as any;
+    const ticketTypesRef = collection(eventRef, "ticketTypes");
 
-    await updateDoc(eventRef, allowedUpdates);
+    // Start a batch write
+    const batch = writeBatch(db);
 
-    // If ticket types are provided, update them
-    if (ticketTypes && Array.isArray(ticketTypes)) {
-      // This is a simplified approach - in a real app you'd need to handle
-      // adding/removing ticket types more carefully, especially if tickets already sold
-      const batch = writeBatch(db);
+    // Update main event document
+    const { ticketTypes, ...eventWithoutTickets } = eventData;
+    if (Object.keys(eventWithoutTickets).length > 0) {
+      batch.update(eventRef, eventWithoutTickets);
+    }
 
+    // Update ticket types if provided
+    if (ticketTypes?.length) {
       // Get existing ticket types
-      const ticketTypesQuery = query(
-        collection(db, `events/${eventId}/ticketTypes`)
-      );
-      const ticketTypesSnap = await getDocs(ticketTypesQuery);
-
+      const existingTicketTypesSnapshot = await getDocs(ticketTypesRef);
+      
       // Delete existing ticket types
-      ticketTypesSnap.docs.forEach((doc) => {
+      existingTicketTypesSnapshot.docs.forEach((doc) => {
         batch.delete(doc.ref);
       });
 
       // Add new ticket types
       ticketTypes.forEach((ticketType) => {
-        const ticketTypeRef = doc(
-          collection(db, `events/${eventId}/ticketTypes`)
-        );
+        const ticketTypeRef = doc(ticketTypesRef);
         batch.set(ticketTypeRef, {
           ...ticketType,
           id: ticketTypeRef.id,
         });
       });
-
-      await batch.commit();
     }
 
-    return true;
+    await batch.commit();
   } catch (error) {
     console.error("Error updating event:", error);
     throw error;

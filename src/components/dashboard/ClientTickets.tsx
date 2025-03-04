@@ -1,12 +1,12 @@
-import { Link } from "react-router-dom";
-import { useAppContext } from "../../contexts/AppContext";
-import { useAuth } from "../../contexts/AuthContext";
-import { Ticket } from "../../types";
-import { useEffect, useState } from "react";
-import { FaPlus } from "react-icons/fa6";
-import { TicketCard } from "./TicketCard";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../../services/firebase";
+import { Link } from 'react-router-dom';
+import { useAppContext } from '../../contexts/AppContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { Ticket } from '../../types';
+import { useEffect, useState } from 'react';
+import { FaPlus } from 'react-icons/fa6';
+import { TicketCard } from './TicketCard';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../../services/firebase';
 
 const ClientTickets = () => {
   const { user } = useAuth();
@@ -21,10 +21,7 @@ const ClientTickets = () => {
       if (!user) return;
       try {
         const userTickets: Ticket[] = [];
-        const fetchQuery = query(
-          collection(db, "tickets"),
-          where("userId", "==", user.id)
-        );
+        const fetchQuery = query(collection(db, 'tickets'), where('userId', '==', user.id));
         const tickets = await getDocs(fetchQuery);
         if (tickets.empty) return;
         tickets.forEach((doc) => userTickets.push(doc.data() as Ticket));
@@ -67,8 +64,17 @@ const ClientTickets = () => {
           <h2 className="text-lg md:text-xl font-semibold text-secondary mr-auto">
             Booked Tickets
           </h2>
+          {user?.role === 'organizer' && (
+            <Link
+              to="/create-event"
+              className="flex items-center gap-1 p-2 rounded-sm cursor-pointer hover:bg-secondary/70 transition-colors duration-150 bg-secondary text-white text-xs"
+            >
+              <FaPlus />
+              <span>Create Event</span>
+            </Link>
+          )}
           <Link
-            to="create-event"
+            to="/create-event"
             className="flex items-center gap-1 p-2 rounded-sm cursor-pointer hover:bg-secondary/70 transition-colors duration-150 bg-secondary text-white text-xs"
           >
             <FaPlus />
@@ -87,7 +93,7 @@ const ClientTickets = () => {
                   deleteTicket={handleDeleteTicket}
                   openModal={openModal}
                   setOpenModal={setOpenModal}
-                  key={ticket.id}
+                  key={ticket.eventId}
                   selectedTicket={selectedTicket}
                 />
               ))
@@ -97,7 +103,7 @@ const ClientTickets = () => {
                 <br />
                 <Link to="/#events" className="underline">
                   Explore
-                </Link>{" "}
+                </Link>{' '}
                 events here
               </p>
             )}

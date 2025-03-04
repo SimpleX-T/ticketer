@@ -3,23 +3,22 @@
   When a user books a ticket for an event, they create a ticket document with references to the event, the ticket type, and user that booked the ticket
  */
 
-import { useEffect, useRef, useState } from "react";
-import { FaTimes } from "react-icons/fa";
-import { BiCalendar } from "react-icons/bi";
-import Barcode from "react-barcode";
-import { FaEllipsisVertical } from "react-icons/fa6";
-import { Event, Ticket, TicketType, User } from "../../types";
-import { DeleteModal } from "./DeleteModal";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../services/firebase";
+import { useEffect, useRef, useState } from 'react';
+import { FaTimes } from 'react-icons/fa';
+import { BiCalendar } from 'react-icons/bi';
+import Barcode from 'react-barcode';
+import { FaEllipsisVertical } from 'react-icons/fa6';
+import { Event, Ticket, TicketType, User } from '../../types';
+import { DeleteModal } from './DeleteModal';
+import { collection, doc, getDoc } from 'firebase/firestore';
+import { db } from '../../services/firebase';
 
 export const TicketCard = ({
   ticket,
   onSelect,
   deleteTicket,
   openModal,
-  setOpenModal,
-  selectedTicket,
+  setOpenModal
 }: {
   ticket: Ticket;
   onSelect: (ticket: Ticket) => void;
@@ -35,12 +34,10 @@ export const TicketCard = ({
   const [ticketUser, setTicketUser] = useState<User | null>(null);
   const [ticketType, setTicketType] = useState<TicketType | null>(null);
 
-
-
   useEffect(() => {
     const getTicketEvent = async () => {
       try {
-        const event = await getDoc(doc(db, "events", ticket.eventId));
+        const event = await getDoc(doc(db, 'events', ticket.eventId));
         if (!event.exists()) return;
         console.log(event.data());
         setTicketEvent(event.data() as Event);
@@ -49,9 +46,9 @@ export const TicketCard = ({
       }
     };
 
-    const getTicketeUser = async () => {
+    const getTicketUser = async () => {
       try {
-        const user = await getDoc(doc(db, "users", ticket.userId));
+        const user = await getDoc(doc(db, 'users', ticket.userId));
         if (!user.exists()) return;
         console.log(user.data());
         setTicketUser(user.data() as User);
@@ -60,11 +57,23 @@ export const TicketCard = ({
       }
     };
 
-    const
+    const getTicketType = async () => {
+      try {
+        const type = await getDoc(
+          doc(collection(doc(db, 'events', ticket.eventId), 'ticketTypes'), ticket.ticketTypeId)
+        );
+        if (!type.exists()) return;
+        console.log(type.data());
+        setTicketType(type.data() as TicketType);
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
-    getTicketeUser();
+    getTicketUser();
     getTicketEvent();
-  }, [ticket.eventId, ticket.userId]);
+    getTicketType();
+  }, [ticket.eventId, ticket.userId, ticket.ticketTypeId]);
 
   const handleShowOption = () => {
     setShowOptions(true);
@@ -82,9 +91,9 @@ export const TicketCard = ({
   };
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -112,7 +121,7 @@ export const TicketCard = ({
 
         <div className="p-4 pr-8">
           <h3 className="text-sm md:text-lg mb-2 font-semibold text-secondary">
-            {ticketEvent?.name || "Event Name"}
+            {ticketEvent?.name || 'Event Name'}
           </h3>
           {/* <p className="text-secondary text-xs md:text-sm mb-1">
           <strong>Tickets for:</strong> {ticket.}
@@ -136,7 +145,7 @@ export const TicketCard = ({
 
           <ul
             className={`${
-              showOptions ? "flex" : "hidden"
+              showOptions ? 'flex' : 'hidden'
             } flex-col text-center border-secondary-100 border rounded-sm bg-secondary-200 absolute top-3/2 right-1/5 w-28`}
           >
             <button
@@ -175,8 +184,7 @@ export const TicketCard = ({
                     📍 {ticketEvent?.location}
                   </address>
                   <p className="text-white text-xs">
-                    <BiCalendar className="inline-block mr-2" />{" "}
-                    {ticketEvent?.date}
+                    <BiCalendar className="inline-block mr-2" /> {ticketEvent?.date}
                   </p>
                 </div>
 
@@ -193,48 +201,30 @@ export const TicketCard = ({
                 <div className="bg-secondary-300 rounded-lg p-2 mb-2">
                   <div className="grid grid-cols-2 text-white mb-4">
                     <div className="border border-t-transparent border-l-transparent border-gray-500 py-1 pr-2">
-                      <span className="text-xs py-2 text-gray-500 mb-1">
-                        Name
-                      </span>
+                      <span className="text-xs py-2 text-gray-500 mb-1">Name</span>
                       <p className="text-xs">{`${ticketUser?.firstname} ${ticketUser?.lastname}`}</p>
                     </div>
 
                     <div className="border-b border-gray-500 py-1 pl-2">
-                      <span className="text-xs py-2 text-gray-500 mb-1">
-                        Email
-                      </span>
-                      <p className="text-xs truncate">
-                        {ticketUser?.email}
-                      </p>
+                      <span className="text-xs py-2 text-gray-500 mb-1">Email</span>
+                      <p className="text-xs truncate">{ticketUser?.email}</p>
                     </div>
 
                     <div className="border-r border-b border-gray-500 py-1 pr-2">
-                      <span className="text-xs py-2 text-gray-500">
-                        Ticket Type
-                      </span>
-                      <p className="text-xs truncate">
-                        {ticket..ticketType?.type}
-                      </p>
+                      <span className="text-xs py-2 text-gray-500">Ticket Type</span>
+                      <p className="text-xs truncate">{ticketType?.type}</p>
                     </div>
 
                     <div className="border-b border-gray-500 py-1 pl-2">
-                      <span className="text-xs text-gray-500 py-2">
-                        Ticket for
-                      </span>
-                      <p className="text-xs truncate">
-                        {selectedTicket.ticketCount}
-                      </p>
+                      <span className="text-xs text-gray-500 py-2">Ticket for</span>
+                      <p className="text-xs truncate">{ticketEvent?.totalCapacity}</p>
                     </div>
                   </div>
 
-                  {selectedTicket.specialRequest && (
+                  {ticket.specialRequests && (
                     <div>
-                      <span className="text-xs text-gray-500 py-2">
-                        Special Request
-                      </span>
-                      <p className="text-xs text-white">
-                        {selectedTicket.specialRequest}
-                      </p>
+                      <span className="text-xs text-gray-500 py-2">Special Request</span>
+                      <p className="text-xs text-white">{ticket.specialRequests}</p>
                     </div>
                   )}
                 </div>
@@ -242,7 +232,7 @@ export const TicketCard = ({
 
               <div className="mt-8 flex items-center justify-center">
                 <Barcode
-                  value={selectedTicket.ticketId as string}
+                  value={ticket.id as string}
                   height={50}
                   width={1}
                   displayValue={true}
