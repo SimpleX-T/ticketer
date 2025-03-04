@@ -1,9 +1,14 @@
+/*
+  When the organizer creates an event, they create a document that contains other event data plus a subcollection of ticketTypes.
+  When a user books a ticket for an event, they create a ticket document with references to the event, the ticket type, and user that booked the ticket
+ */
+
 import { useEffect, useRef, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { BiCalendar } from "react-icons/bi";
 import Barcode from "react-barcode";
 import { FaEllipsisVertical } from "react-icons/fa6";
-import { Event, Ticket } from "../../types";
+import { Event, Ticket, TicketType, User } from "../../types";
 import { DeleteModal } from "./DeleteModal";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../services/firebase";
@@ -27,9 +32,13 @@ export const TicketCard = ({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const optionRef = useRef<HTMLDivElement | null>(null);
   const [ticketEvent, setTicketEvent] = useState<Event | null>(null);
+  const [ticketUser, setTicketUser] = useState<User | null>(null);
+  const [ticketType, setTicketType] = useState<TicketType | null>(null);
+
+
 
   useEffect(() => {
-    const fetchEvent = async () => {
+    const getTicketEvent = async () => {
       try {
         const event = await getDoc(doc(db, "events", ticket.eventId));
         if (!event.exists()) return;
@@ -39,8 +48,23 @@ export const TicketCard = ({
         console.log(error);
       }
     };
-    fetchEvent();
-  }, [ticket.eventId]);
+
+    const getTicketeUser = async () => {
+      try {
+        const user = await getDoc(doc(db, "users", ticket.userId));
+        if (!user.exists()) return;
+        console.log(user.data());
+        setTicketUser(user.data() as User);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const
+
+    getTicketeUser();
+    getTicketEvent();
+  }, [ticket.eventId, ticket.userId]);
 
   const handleShowOption = () => {
     setShowOptions(true);
@@ -157,9 +181,9 @@ export const TicketCard = ({
                 </div>
 
                 <div className="gap-6 mb-6 flex items-center justify-center w-48 h-48 rounded-xl overflow-hidden border-[4px] mx-auto border-secondary">
-                  {ticketEvent?.profileImage && (
+                  {ticketUser?.profileImage && (
                     <img
-                      src={selectedTicket.profileImage}
+                      src={ticketUser.profileImage}
                       alt="Profile"
                       className="w-full h-full object-cover"
                     />
@@ -172,7 +196,7 @@ export const TicketCard = ({
                       <span className="text-xs py-2 text-gray-500 mb-1">
                         Name
                       </span>
-                      <p className="text-xs">{selectedTicket.userName}</p>
+                      <p className="text-xs">{`${ticketUser?.firstname} ${ticketUser?.lastname}`}</p>
                     </div>
 
                     <div className="border-b border-gray-500 py-1 pl-2">
@@ -180,7 +204,7 @@ export const TicketCard = ({
                         Email
                       </span>
                       <p className="text-xs truncate">
-                        {selectedTicket.userEmail}
+                        {ticketUser?.email}
                       </p>
                     </div>
 
@@ -189,7 +213,7 @@ export const TicketCard = ({
                         Ticket Type
                       </span>
                       <p className="text-xs truncate">
-                        {selectedTicket.ticketType?.type}
+                        {ticket..ticketType?.type}
                       </p>
                     </div>
 
