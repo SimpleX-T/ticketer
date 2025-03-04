@@ -16,11 +16,12 @@ export default function SeedDatabase() {
     try {
       setIsSeeding(true);
       const result = await seedDatabase(user.id);
-      if (result.success) {
-        toast.success(result.message);
-      } else {
-        toast.error(result.message);
-      }
+      console.log(result)
+      // if (result.success) {
+      //   toast.success(result.message);
+      // } else {
+      //   toast.error(result.message);
+      // }
     } catch (error) {
       toast.error('An error occurred while seeding the database');
       console.error(error);

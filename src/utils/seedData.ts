@@ -1,5 +1,5 @@
 import { collection, doc, setDoc } from 'firebase/firestore';
-import { Event, EventStatus, User, TicketType } from '../types';
+import { Event, EventStatus, User, TicketType, Ticket, TicketStatus } from '../types';
 import { db } from '../services/firebase';
 
 const sampleUsers: Partial<User>[] = [
@@ -120,37 +120,88 @@ const generateEvents = (organizerId: string): Event[] => {
   return futureEvents;
 };
 
+const generateTickets = (currentUserId: string, events: Event[]): Partial<Ticket>[] => {
+  const tickets: Partial<Ticket>[] = [];
+  const now = new Date('2025-03-04T15:50:19+01:00');
+
+  // Helper function to generate a random ticket code
+  const generateTicketCode = () => Math.random().toString(36).substring(2, 10).toUpperCase();
+
+  events.forEach(event => {
+    event.ticketTypes.forEach(ticketType => {
+      // Generate tickets for current user (3-4 tickets per event)
+      for (let i = 0; i < Math.floor(Math.random() * 2) + 3; i++) {
+        tickets.push({
+          id: `ticket-${event.id}-${currentUserId}-${i}`,
+          ticketTypeId: ticketType.id,
+          eventId: event.id,
+          userId: currentUserId,
+          purchaseDate: new Date(now.getTime() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+          status: TicketStatus.PURCHASED,
+          price: ticketType.price,
+          ticketCode: generateTicketCode(),
+          isTransferred: false
+        });
+      }
+
+      // Generate tickets for other users (2-3 tickets per event)
+      sampleUsers.forEach(user => {
+        if (user.id !== currentUserId) {
+          for (let i = 0; i < Math.floor(Math.random() * 2) + 2; i++) {
+            tickets.push({
+              id: `ticket-${event.id}-${user.id}-${i}`,
+              ticketTypeId: ticketType.id,
+              eventId: event.id,
+              userId: user.id!,
+              purchaseDate: new Date(now.getTime() - Math.random() * 14 * 24 * 60 * 60 * 1000).toISOString(),
+              status: TicketStatus.PURCHASED,
+              price: ticketType.price,
+              ticketCode: generateTicketCode(),
+              isTransferred: false
+            });
+          }
+        }
+      });
+    });
+  });
+
+  return tickets;
+};
+
 export const seedDatabase = async (currentUserId: string) => {
   try {
-    // Add sample users
+    // Seed users
     const usersCollection = collection(db, 'users');
-    for (const user of sampleUsers) {
-      await setDoc(doc(usersCollection, user.id), user);
-    }
+    const userPromises = sampleUsers.map(user => 
+      setDoc(doc(usersCollection, user.id), {
+        ...user,
+        createdAt: new Date('2025-03-04T15:50:19+01:00').toISOString()
+      })
+    );
+    await Promise.all(userPromises);
+    console.log('Users seeded successfully');
 
-    // Add events for current user and one sample organizer
-    const events = [
-      ...generateEvents(currentUserId),
-      ...generateEvents('user2') // Adding events for Bob (sample organizer)
-    ];
-
-    // Add events
+    // Seed events
+    const events = generateEvents(currentUserId);
     const eventsCollection = collection(db, 'events');
-    for (const event of events) {
-      const eventDoc = doc(eventsCollection, event.id);
-      await setDoc(eventDoc, event);
+    const eventPromises = events.map(event =>
+      setDoc(doc(eventsCollection, event.id), event)
+    );
+    await Promise.all(eventPromises);
+    console.log('Events seeded successfully');
 
-      // Add ticket types as a subcollection
-      const ticketTypesCollection = collection(eventDoc, 'ticketTypes');
-      for (const ticket of event.ticketTypes) {
-        await setDoc(doc(ticketTypesCollection, ticket.id), ticket);
-      }
-    }
+    // Seed tickets
+    const tickets = generateTickets(currentUserId, events);
+    const ticketsCollection = collection(db, 'tickets');
+    const ticketPromises = tickets.map(ticket =>
+      setDoc(doc(ticketsCollection, ticket.id), ticket)
+    );
+    await Promise.all(ticketPromises);
+    console.log('Tickets seeded successfully');
 
-    console.log('Database seeded successfully!');
-    return { success: true, message: 'Database seeded successfully!' };
+    return { success: true };
   } catch (error) {
     console.error('Error seeding database:', error);
-    return { success: false, message: 'Error seeding database' };
+    return { success: false, error };
   }
 };
