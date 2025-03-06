@@ -5,11 +5,11 @@ import {
   useContext,
   useState,
 } from "react";
-import { UserTicketData } from "../types";
+import { Ticket } from "../types";
 
 interface AppContextType {
-  userTickets: UserTicketData[];
-  addTicket: (ticket: UserTicketData) => SetStateAction<void>;
+  userTickets: Ticket[];
+  addTicket: (ticket: Ticket) => SetStateAction<void>;
   deleteTicket: (id: string | number) => void;
 }
 
@@ -26,11 +26,11 @@ interface AppProviderProps {
 }
 
 const AppProvider = ({ children }: AppProviderProps) => {
-  const [userTickets, setUserTickets] = useState<UserTicketData[]>(() =>
+  const [userTickets, setUserTickets] = useState<Ticket[]>(() =>
     JSON.parse(localStorage.getItem("userTickets") || "[]")
   );
 
-  const addTicket = (ticket: UserTicketData) => {
+  const addTicket = (ticket: Ticket) => {
     setUserTickets((prev) => [...prev, ticket]);
     localStorage.setItem(
       "userTickets",
@@ -39,7 +39,7 @@ const AppProvider = ({ children }: AppProviderProps) => {
   };
 
   const deleteTicket = (ticketId: string | number) => {
-    const newTickets = userTickets.filter((el) => el.ticketId !== ticketId);
+    const newTickets = userTickets.filter((el) => el.id !== ticketId);
     setUserTickets(newTickets);
     localStorage.setItem("userTickets", JSON.stringify(newTickets));
   };

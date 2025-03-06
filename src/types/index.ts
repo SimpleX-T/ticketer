@@ -105,14 +105,3 @@ export interface TicketPurchaseData {
   specialRequests?: string;
   userId: string;
 }
-export interface TicketWithDetails {
-  id: string;
-  ticketCode: string;
-  eventName: string;
-  eventDate: string;
-  eventLocation: string;
-  ticketType: string;
-  price: number;
-  status: TicketStatus;
-  purchaseDate: string;
-}

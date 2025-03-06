@@ -15,7 +15,6 @@ import {
   TicketPurchaseData,
   TicketStatus,
   TicketType,
-  TicketWithDetails,
   User,
   Event,
 } from "../types";
@@ -241,25 +240,28 @@ export const getUserTickets = async (userId: string) => {
       );
       const ticketTypeSnap = await getDoc(ticketTypeRef);
 
-      let ticketTypeName = "Unknown";
+      let ticketTypeId = "";
       if (ticketTypeSnap.exists()) {
         const ticketTypeData = ticketTypeSnap.data() as TicketType;
-        ticketTypeName = ticketTypeData.name;
+        ticketTypeId = ticketTypeData.id;
       }
 
       tickets.push({
         id: ticketData.id,
-        ticketCode: ticketData.ticketCode,
-        eventName: eventData.name,
-        eventDate: eventData.date,
-        eventLocation: eventData.location,
-        ticketType: ticketTypeName,
-        price: ticketData.price,
-        status: ticketData.status,
+        ticketTypeId: ticketTypeId,
+        eventId: eventData.id,
+        userId: ticketData.userId,
         purchaseDate: ticketData.purchaseDate,
-      } as TicketWithDetails);
+        status: ticketData.status,
+        price: ticketData.price,
+        ticketCode: ticketData.ticketCode,
+        isTransferred: ticketData.isTransferred,
+        transferredTo: ticketData.transferredTo,
+        specialRequests: ticketData.specialRequests,
+      } as Ticket);
     }
 
+    console.log(tickets);
     return tickets;
   } catch (error) {
     console.error("Error fetching user tickets:", error);

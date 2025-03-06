@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { createEvent } from '../../hooks/useFirebaseEvents';
 import { FaPlus, FaX } from 'react-icons/fa6';
 import { ScrollRestoration, useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
+// import { toast } from 'react-hot-toast';
 import SeedDatabase from '../admin/SeedDatabase';
 
 interface EventForm extends Omit<Event, 'id' | 'createdAt' | 'ticketsSold' | 'soldOut'> {
@@ -78,12 +78,12 @@ export default function EventCreationForm() {
       if (!file) return;
 
       if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-        toast.error('Invalid file type. Please upload a JPEG, PNG, or GIF');
+        alert('Invalid file type. Please upload a JPEG, PNG, or GIF');
         return;
       }
 
       if (file.size > MAX_FILE_SIZE) {
-        toast.error('File too large. Maximum size is 5MB');
+        alert('File too large. Maximum size is 5MB');
         return;
       }
 

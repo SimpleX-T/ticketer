@@ -3,22 +3,20 @@
   When a user books a ticket for an event, they create a ticket document with references to the event, the ticket type, and user that booked the ticket
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { FaTimes } from 'react-icons/fa';
-import { BiCalendar } from 'react-icons/bi';
-import Barcode from 'react-barcode';
-import { FaEllipsisVertical } from 'react-icons/fa6';
-import { Event, Ticket, TicketType, User } from '../../types';
-import { DeleteModal } from './DeleteModal';
-import { collection, doc, getDoc } from 'firebase/firestore';
-import { db } from '../../services/firebase';
+import { useEffect, useRef, useState } from "react";
+import { FaEllipsisVertical } from "react-icons/fa6";
+import { Event, Ticket, TicketType, User } from "../../types";
+import { DeleteModal } from "./DeleteModal";
+import { collection, doc, getDoc } from "firebase/firestore";
+import { db } from "../../services/firebase";
+import TicketPreviewModal from "./TicketPreviewModal";
 
 export const TicketCard = ({
   ticket,
   onSelect,
   deleteTicket,
   openModal,
-  setOpenModal
+  setOpenModal,
 }: {
   ticket: Ticket;
   onSelect: (ticket: Ticket) => void;
@@ -37,7 +35,7 @@ export const TicketCard = ({
   useEffect(() => {
     const getTicketEvent = async () => {
       try {
-        const event = await getDoc(doc(db, 'events', ticket.eventId));
+        const event = await getDoc(doc(db, "events", ticket.eventId));
         if (!event.exists()) return;
         console.log(event.data());
         setTicketEvent(event.data() as Event);
@@ -48,7 +46,7 @@ export const TicketCard = ({
 
     const getTicketUser = async () => {
       try {
-        const user = await getDoc(doc(db, 'users', ticket.userId));
+        const user = await getDoc(doc(db, "users", ticket.userId));
         if (!user.exists()) return;
         console.log(user.data());
         setTicketUser(user.data() as User);
@@ -60,7 +58,10 @@ export const TicketCard = ({
     const getTicketType = async () => {
       try {
         const type = await getDoc(
-          doc(collection(doc(db, 'events', ticket.eventId), 'ticketTypes'), ticket.ticketTypeId)
+          doc(
+            collection(doc(db, "events", ticket.eventId), "ticketTypes"),
+            ticket.ticketTypeId
+          )
         );
         if (!type.exists()) return;
         console.log(type.data());
@@ -91,9 +92,9 @@ export const TicketCard = ({
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -121,7 +122,7 @@ export const TicketCard = ({
 
         <div className="p-4 pr-8">
           <h3 className="text-sm md:text-lg mb-2 font-semibold text-secondary">
-            {ticketEvent?.name || 'Event Name'}
+            {ticketEvent?.name || "Event Name"}
           </h3>
           {/* <p className="text-secondary text-xs md:text-sm mb-1">
           <strong>Tickets for:</strong> {ticket.}
@@ -145,7 +146,7 @@ export const TicketCard = ({
 
           <ul
             className={`${
-              showOptions ? 'flex' : 'hidden'
+              showOptions ? "flex" : "hidden"
             } flex-col text-center border-secondary-100 border rounded-sm bg-secondary-200 absolute top-3/2 right-1/5 w-28`}
           >
             <button
@@ -173,83 +174,13 @@ export const TicketCard = ({
 
       {openModal && (
         <div className="fixed w-full min-h-screen inset-0 bg-primary/20 backdrop-blur-md flex items-center justify-center">
-          <div className="w-full flex items-center justify-center h-full relative">
-            <div className="p-6 mb-8 w-full ticket max-w-[400px] mx-auto mt-20">
-              <div className="border border-secondary w-full rounded-xl p-4">
-                <div className="mb-6 text-center">
-                  <h2 className="text-5xl font-semibold font-[Road_Rage] text-white mb-2">
-                    {ticketEvent?.name}
-                  </h2>
-                  <address className="text-white text-xs not-italic">
-                    📍 {ticketEvent?.location}
-                  </address>
-                  <p className="text-white text-xs">
-                    <BiCalendar className="inline-block mr-2" /> {ticketEvent?.date}
-                  </p>
-                </div>
-
-                <div className="gap-6 mb-6 flex items-center justify-center w-48 h-48 rounded-xl overflow-hidden border-[4px] mx-auto border-secondary">
-                  {ticketUser?.profileImage && (
-                    <img
-                      src={ticketUser.profileImage}
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </div>
-
-                <div className="bg-secondary-300 rounded-lg p-2 mb-2">
-                  <div className="grid grid-cols-2 text-white mb-4">
-                    <div className="border border-t-transparent border-l-transparent border-gray-500 py-1 pr-2">
-                      <span className="text-xs py-2 text-gray-500 mb-1">Name</span>
-                      <p className="text-xs">{`${ticketUser?.firstname} ${ticketUser?.lastname}`}</p>
-                    </div>
-
-                    <div className="border-b border-gray-500 py-1 pl-2">
-                      <span className="text-xs py-2 text-gray-500 mb-1">Email</span>
-                      <p className="text-xs truncate">{ticketUser?.email}</p>
-                    </div>
-
-                    <div className="border-r border-b border-gray-500 py-1 pr-2">
-                      <span className="text-xs py-2 text-gray-500">Ticket Type</span>
-                      <p className="text-xs truncate">{ticketType?.type}</p>
-                    </div>
-
-                    <div className="border-b border-gray-500 py-1 pl-2">
-                      <span className="text-xs text-gray-500 py-2">Ticket for</span>
-                      <p className="text-xs truncate">{ticketEvent?.totalCapacity}</p>
-                    </div>
-                  </div>
-
-                  {ticket.specialRequests && (
-                    <div>
-                      <span className="text-xs text-gray-500 py-2">Special Request</span>
-                      <p className="text-xs text-white">{ticket.specialRequests}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-8 flex items-center justify-center">
-                <Barcode
-                  value={ticket.id as string}
-                  height={50}
-                  width={1}
-                  displayValue={true}
-                  background=""
-                  lineColor="#ffffff"
-                  fontSize={14}
-                />
-              </div>
-
-              <button
-                onClick={() => setOpenModal(false)}
-                className="flex items-center justify-center absolute top-20 text-white bg-primary right-1/5 p-2 rounded-full cursor-pointer"
-              >
-                <FaTimes />
-              </button>
-            </div>
-          </div>
+          <TicketPreviewModal
+            ticketEvent={ticketEvent}
+            ticketUser={ticketUser}
+            ticketType={ticketType}
+            ticket={ticket}
+            onclose={setOpenModal}
+          />
         </div>
       )}
     </div>

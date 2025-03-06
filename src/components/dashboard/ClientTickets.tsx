@@ -1,39 +1,57 @@
-import { Link } from 'react-router-dom';
-import { useAppContext } from '../../contexts/AppContext';
-import { useAuth } from '../../contexts/AuthContext';
-import { Ticket } from '../../types';
-import { useEffect, useState } from 'react';
-import { FaPlus } from 'react-icons/fa6';
-import { TicketCard } from './TicketCard';
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import { db } from '../../services/firebase';
+import { Link } from "react-router-dom";
+import { useAppContext } from "../../contexts/AppContext";
+import { useAuth } from "../../contexts/AuthContext";
+import { Ticket } from "../../types";
+import { useEffect, useState } from "react";
+import { FaPlus } from "react-icons/fa6";
+import { TicketCard } from "./TicketCard";
+// import { collection, getDocs, query, where } from "firebase/firestore";
+// import { db } from "../../services/firebase";
+import { useQuery } from "@tanstack/react-query";
+import { getUserTickets } from "../../hooks/useFirebaseTickets";
+import TicketCardSkeleton from "./TicketCardSkeleton";
 
 const ClientTickets = () => {
   const { user } = useAuth();
   const { deleteTicket } = useAppContext();
   const [openModal, setOpenModal] = useState<boolean>(false);
-  const [userTickets, setUserTickets] = useState<Ticket[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [selectedTicket, setSelectedTicket] = useState<Ticket>(userTickets[0]);
+  // const [userTickets, setUserTickets] = useState<Ticket[]>([]);
+  // const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const { data: userTickets, isLoading } = useQuery({
+    queryFn: () => getUserTickets(user?.id || ""),
+    queryKey: ["userTickets", user?.id],
+    enabled: !!user,
+  });
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
   useEffect(() => {
-    const getUserTickets = async () => {
-      if (!user) return;
-      try {
-        const userTickets: Ticket[] = [];
-        const fetchQuery = query(collection(db, 'tickets'), where('userId', '==', user.id));
-        const tickets = await getDocs(fetchQuery);
-        if (tickets.empty) return;
-        tickets.forEach((doc) => userTickets.push(doc.data() as Ticket));
-        setUserTickets(userTickets);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    getUserTickets();
-  }, [user]);
+    if (userTickets && userTickets.length > 0) {
+      setSelectedTicket(userTickets[0] as unknown as Ticket);
+    }
+  }, [userTickets]);
+
+  // useEffect(() => {
+  //   const getUserTickets = async () => {
+  //     if (!user) return;
+  //     try {
+  //       const userTickets: Ticket[] = [];
+  //       const fetchQuery = query(
+  //         collection(db, "tickets"),
+  //         where("userId", "==", user.id)
+  //       );
+  //       const tickets = await getDocs(fetchQuery);
+  //       if (tickets.empty) return;
+  //       tickets.forEach((doc) => userTickets.push(doc.data() as Ticket));
+  //       setUserTickets(userTickets);
+  //     } catch (error) {
+  //       console.log(error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+  //   getUserTickets();
+  // }, [user]);
 
   const handleSelectTicket = (ticket: Ticket) => {
     setSelectedTicket(ticket);
@@ -64,7 +82,7 @@ const ClientTickets = () => {
           <h2 className="text-lg md:text-xl font-semibold text-secondary mr-auto">
             Booked Tickets
           </h2>
-          {user?.role === 'organizer' && (
+          {user?.role === "organizer" || user?.role === "admin" ? (
             <Link
               to="/create-event"
               className="flex items-center gap-1 p-2 rounded-sm cursor-pointer hover:bg-secondary/70 transition-colors duration-150 bg-secondary text-white text-xs"
@@ -72,20 +90,24 @@ const ClientTickets = () => {
               <FaPlus />
               <span>Create Event</span>
             </Link>
+          ) : (
+            <Link
+              to="/#events"
+              className="flex items-center gap-1 p-2 rounded-sm cursor-pointer hover:bg-secondary/70 transition-colors duration-150 bg-secondary text-white text-xs"
+            >
+              <span>Explore Events</span>
+            </Link>
           )}
-          <Link
-            to="/create-event"
-            className="flex items-center gap-1 p-2 rounded-sm cursor-pointer hover:bg-secondary/70 transition-colors duration-150 bg-secondary text-white text-xs"
-          >
-            <FaPlus />
-            <span>Create Event</span>
-          </Link>
         </div>
         {isLoading ? (
-          <p>Loading...</p>
+          <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-4">
+            {[...Array(6)].map((_, index) => (
+              <TicketCardSkeleton key={index} />
+            ))}
+          </div>
         ) : (
           <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-4 relative md:p-2 items-start">
-            {userTickets.length > 0 ? (
+            {userTickets && userTickets?.length > 0 ? (
               userTickets.map((ticket) => (
                 <TicketCard
                   ticket={ticket}
@@ -93,8 +115,8 @@ const ClientTickets = () => {
                   deleteTicket={handleDeleteTicket}
                   openModal={openModal}
                   setOpenModal={setOpenModal}
-                  key={ticket.eventId}
-                  selectedTicket={selectedTicket}
+                  key={ticket.ticketCode}
+                  selectedTicket={selectedTicket as Ticket}
                 />
               ))
             ) : (
@@ -103,7 +125,7 @@ const ClientTickets = () => {
                 <br />
                 <Link to="/#events" className="underline">
                   Explore
-                </Link>{' '}
+                </Link>{" "}
                 events here
               </p>
             )}
