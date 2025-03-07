@@ -74,7 +74,7 @@ export const createEvent = async (
 
 // Publish an event (change status from DRAFT to PUBLISHED)
 export const publishEvent = async (
-  eventId: string, 
+  eventId: string,
   currentUser: User
 ): Promise<void> => {
   try {
@@ -87,7 +87,10 @@ export const publishEvent = async (
 
     const eventData = eventDoc.data() as Event;
 
-    if (eventData.organizerId !== currentUser.id && currentUser.role !== "admin") {
+    if (
+      eventData.organizerId !== currentUser.id &&
+      currentUser.role !== "admin"
+    ) {
       throw new Error("Unauthorized to publish this event");
     }
 
@@ -101,7 +104,9 @@ export const publishEvent = async (
 };
 
 // Get event with ticket types
-export const getEventWithTickets = async (eventId: string): Promise<Event | null> => {
+export const getEventWithTickets = async (
+  eventId: string
+): Promise<Event | null> => {
   try {
     const eventRef = doc(db, "events", eventId);
     const eventDoc = await getDoc(eventRef);
@@ -111,11 +116,11 @@ export const getEventWithTickets = async (eventId: string): Promise<Event | null
     }
 
     const eventData = eventDoc.data() as Omit<Event, "ticketTypes">;
-    
+
     // Get ticket types from subcollection
     const ticketTypesRef = collection(eventRef, "ticketTypes");
     const ticketTypesSnapshot = await getDocs(ticketTypesRef);
-    const ticketTypes = ticketTypesSnapshot.docs.map(doc => ({
+    const ticketTypes = ticketTypesSnapshot.docs.map((doc) => ({
       ...doc.data(),
       id: doc.id,
     })) as TicketType[];
@@ -146,7 +151,10 @@ export const updateEvent = async (
 
     const existingEvent = eventDoc.data() as Event;
 
-    if (existingEvent.organizerId !== currentUser.id && currentUser.role !== "admin") {
+    if (
+      existingEvent.organizerId !== currentUser.id &&
+      currentUser.role !== "admin"
+    ) {
       throw new Error("Unauthorized to update this event");
     }
 
@@ -165,7 +173,7 @@ export const updateEvent = async (
     if (ticketTypes?.length) {
       // Get existing ticket types
       const existingTicketTypesSnapshot = await getDocs(ticketTypesRef);
-      
+
       // Delete existing ticket types
       existingTicketTypesSnapshot.docs.forEach((doc) => {
         batch.delete(doc.ref);

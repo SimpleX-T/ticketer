@@ -37,7 +37,6 @@ export const TicketCard = ({
       try {
         const event = await getDoc(doc(db, "events", ticket.eventId));
         if (!event.exists()) return;
-        console.log(event.data());
         setTicketEvent(event.data() as Event);
       } catch (error) {
         console.log(error);
@@ -48,7 +47,6 @@ export const TicketCard = ({
       try {
         const user = await getDoc(doc(db, "users", ticket.userId));
         if (!user.exists()) return;
-        console.log(user.data());
         setTicketUser(user.data() as User);
       } catch (error) {
         console.log(error);
@@ -64,7 +62,6 @@ export const TicketCard = ({
           )
         );
         if (!type.exists()) return;
-        console.log(type.data());
         setTicketType(type.data() as TicketType);
       } catch (error) {
         console.log(error);

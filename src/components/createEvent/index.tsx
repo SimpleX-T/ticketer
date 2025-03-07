@@ -1,53 +1,57 @@
-import { useState, useCallback, useEffect } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { Event, EventStatus, TicketType } from '../../types';
-import { useAuth } from '../../contexts/AuthContext';
-import { createEvent } from '../../hooks/useFirebaseEvents';
-import { FaPlus, FaX } from 'react-icons/fa6';
-import { ScrollRestoration, useNavigate } from 'react-router-dom';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useState, useCallback, useEffect } from "react";
+import { useDropzone } from "react-dropzone";
+import { Event, EventStatus, TicketType } from "../../types";
+import { useAuth } from "../../contexts/AuthContext";
+import { createEvent } from "../../hooks/useFirebaseEvents";
+import { FaPlus, FaX } from "react-icons/fa6";
+import { ScrollRestoration, useNavigate } from "react-router-dom";
 // import { toast } from 'react-hot-toast';
-import SeedDatabase from '../admin/SeedDatabase';
+import SeedDatabase from "../admin/SeedDatabase";
 
-interface EventForm extends Omit<Event, 'id' | 'createdAt' | 'ticketsSold' | 'soldOut'> {
+interface EventForm
+  extends Omit<Event, "id" | "createdAt" | "ticketsSold" | "soldOut"> {
   imageFile?: File;
   imageUrl?: string;
 }
 
 const INITIAL_TICKET_TYPE: TicketType = {
-  id: '',
-  name: '',
+  id: "",
+  name: "",
   price: 0,
-  type: 'regular',
+  type: "regular",
   available: 0,
   total: 0,
-  description: '',
-  benefits: []
+  description: "",
+  benefits: [],
 };
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
+const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/gif"];
 
 export default function EventCreationForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [ticketTypes, setTicketTypes] = useState<TicketType[]>([{ ...INITIAL_TICKET_TYPE }]);
+  const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
+    { ...INITIAL_TICKET_TYPE },
+  ]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<EventForm>({
-    name: '',
-    date: '',
-    location: '',
-    description: '',
-    image: '',
+    name: "",
+    date: "",
+    location: "",
+    description: "",
+    image: "",
     imageFile: undefined,
     ticketTypes: [],
-    organizerId: user?.id || '',
+    organizerId: user?.id || "",
     maxTicketsPerUser: 4,
-    category: '',
+    category: "",
     status: EventStatus.DRAFT,
-    totalCapacity: 0
+    totalCapacity: 0,
   });
 
   // Cleanup preview URL when component unmounts
@@ -60,13 +64,13 @@ export default function EventCreationForm() {
   }, [previewUrl]);
 
   const validateTicketTypes = (types: TicketType[]): string | null => {
-    if (types.length === 0) return 'At least one ticket type is required';
+    if (types.length === 0) return "At least one ticket type is required";
 
     for (const ticket of types) {
-      if (!ticket.name.trim()) return 'Ticket name is required';
-      if (ticket.price < 0) return 'Price cannot be negative';
-      if (ticket.total < 1) return 'Total tickets must be at least 1';
-      if (!ticket.type) return 'Ticket type is required';
+      if (!ticket.name.trim()) return "Ticket name is required";
+      if (ticket.price < 0) return "Price cannot be negative";
+      if (ticket.total < 1) return "Total tickets must be at least 1";
+      if (!ticket.type) return "Ticket type is required";
     }
 
     return null;
@@ -78,12 +82,12 @@ export default function EventCreationForm() {
       if (!file) return;
 
       if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-        alert('Invalid file type. Please upload a JPEG, PNG, or GIF');
+        alert("Invalid file type. Please upload a JPEG, PNG, or GIF");
         return;
       }
 
       if (file.size > MAX_FILE_SIZE) {
-        alert('File too large. Maximum size is 5MB');
+        alert("File too large. Maximum size is 5MB");
         return;
       }
 
@@ -98,7 +102,7 @@ export default function EventCreationForm() {
       setFormData((prev) => ({
         ...prev,
         imageFile: file,
-        imageUrl: undefined
+        imageUrl: undefined,
       }));
     },
     [previewUrl]
@@ -107,15 +111,15 @@ export default function EventCreationForm() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.gif']
+      "image/*": [".jpeg", ".jpg", ".png", ".gif"],
     },
     maxFiles: 1,
-    maxSize: MAX_FILE_SIZE
+    maxSize: MAX_FILE_SIZE,
   });
 
   const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
-    // Cleanup old preview URL if exists
+
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
@@ -124,7 +128,7 @@ export default function EventCreationForm() {
     setFormData((prev) => ({
       ...prev,
       imageUrl: url,
-      imageFile: undefined
+      imageFile: undefined,
     }));
   };
 
@@ -136,13 +140,16 @@ export default function EventCreationForm() {
     const newTicketTypes = [...ticketTypes];
     newTicketTypes[index] = {
       ...newTicketTypes[index],
-      [field]: value
+      [field]: value,
     };
     setTicketTypes(newTicketTypes);
 
     // Update total capacity
-    if (field === 'total') {
-      const totalCapacity = newTicketTypes.reduce((sum, ticket) => sum + Number(ticket.total), 0);
+    if (field === "total") {
+      const totalCapacity = newTicketTypes.reduce(
+        (sum, ticket) => sum + Number(ticket.total),
+        0
+      );
       setFormData((prev) => ({ ...prev, totalCapacity }));
     }
   };
@@ -154,7 +161,10 @@ export default function EventCreationForm() {
   const removeTicketType = (index: number) => {
     setTicketTypes((prev) => {
       const newTypes = prev.filter((_, i) => i !== index);
-      const totalCapacity = newTypes.reduce((sum, ticket) => sum + ticket.total, 0);
+      const totalCapacity = newTypes.reduce(
+        (sum, ticket) => sum + ticket.total,
+        0
+      );
       setFormData((prev) => ({ ...prev, totalCapacity }));
       return newTypes;
     });
@@ -167,54 +177,65 @@ export default function EventCreationForm() {
 
     try {
       // Validate form
-      if (!formData.name.trim()) throw new Error('Event name is required');
-      if (!formData.date) throw new Error('Event date is required');
-      if (!formData.location.trim()) throw new Error('Location is required');
-      if (!formData.description.trim()) throw new Error('Description is required');
-      if (!formData.category.trim()) throw new Error('Category is required');
+      if (!formData.name.trim()) throw new Error("Event name is required");
+      if (!formData.date) throw new Error("Event date is required");
+      if (!formData.location.trim()) throw new Error("Location is required");
+      if (!formData.description.trim())
+        throw new Error("Description is required");
+      if (!formData.category.trim()) throw new Error("Category is required");
 
       const ticketError = validateTicketTypes(ticketTypes);
       if (ticketError) throw new Error(ticketError);
 
       if (!formData.imageFile && !formData.imageUrl) {
-        throw new Error('Please provide an image URL or upload an image');
+        throw new Error("Please provide an image URL or upload an image");
       }
 
       let imageUrl = formData.imageUrl;
 
       if (formData.imageFile) {
         const _formData = new FormData();
-        _formData.append('file', formData.imageFile);
-        _formData.append('upload_preset', process.env.VITE_CLOUDINARY_UPLOAD_PRESET!);
+        _formData.append("file", formData.imageFile);
+        _formData.append(
+          "upload_preset",
+          import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET!
+        );
 
         const response = await fetch(
-          `https://api.cloudinary.com/v1_1/${process.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+          `https://api.cloudinary.com/v1_1/${
+            import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+          }/image/upload`,
           {
-            method: 'POST',
-            body: _formData
+            method: "POST",
+            body: _formData,
           }
         );
 
         const data = await response.json();
-        if (!response.ok) throw new Error(data.message || 'Upload failed');
+        if (!response.ok) throw new Error(data.message || "Upload failed");
 
         imageUrl = data.secure_url;
       }
+      const {
+        imageFile,
+        imageUrl: imgUrl,
+        ...formDataWithoutImages
+      } = formData;
 
       const eventData: EventForm = {
-        ...formData,
+        ...formDataWithoutImages,
         image: imageUrl!,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         ticketTypes: ticketTypes.map(({ id, ...rest }) => ({
           ...rest,
-          id: ''
-        }))
+          id: "",
+        })),
       };
 
       await createEvent(eventData, user!);
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred";
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -234,7 +255,9 @@ export default function EventCreationForm() {
       >
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-medium text-secondary">Create New Event</h2>
+            <h2 className="text-xl font-medium text-secondary">
+              Create New Event
+            </h2>
             {/* <button
               type="button"
               onClick={() => navigate(-1)}
@@ -246,9 +269,14 @@ export default function EventCreationForm() {
           </div>
 
           {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded flex items-center gap-2">
-              <FaX className="shrink-0" />
-              <p>{error}</p>
+            <div className="bg-red-50 text-red-600 p-3 rounded flex items-center gap-2 relative">
+              <button
+                onClick={() => setError(null)}
+                className="text-sm cursor-pointer rounded-sm focus:ring-1 bg-red-500 text-red-200 absolute top-4 -translate-y-1/2 right-2 focus:ring-red-400 p-1"
+              >
+                <FaX className="shrink-0" />
+              </button>
+              <p className="max-w-[55ch]">{error}</p>
             </div>
           )}
 
@@ -258,7 +286,9 @@ export default function EventCreationForm() {
               type="text"
               placeholder="Event Name"
               value={formData.name}
-              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, name: e.target.value }))
+              }
               className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
               required
             />
@@ -266,7 +296,9 @@ export default function EventCreationForm() {
             <input
               type="datetime-local"
               value={formData.date}
-              onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, date: e.target.value }))
+              }
               className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
               required
             />
@@ -275,7 +307,9 @@ export default function EventCreationForm() {
               type="text"
               placeholder="Location"
               value={formData.location}
-              onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, location: e.target.value }))
+              }
               className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
               required
             />
@@ -283,7 +317,12 @@ export default function EventCreationForm() {
             <textarea
               placeholder="Event Description"
               value={formData.description}
-              onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
               className="w-full p-2 border rounded h-32 placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
               required
             />
@@ -292,7 +331,9 @@ export default function EventCreationForm() {
               type="text"
               placeholder="Category"
               value={formData.category}
-              onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, category: e.target.value }))
+              }
               className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
               required
             />
@@ -305,7 +346,7 @@ export default function EventCreationForm() {
                 <input
                   type="text"
                   placeholder="Image URL"
-                  value={formData.imageUrl || ''}
+                  value={formData.imageUrl || ""}
                   onChange={handleImageUrlChange}
                   className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
                   disabled={!!formData.imageFile}
@@ -316,8 +357,12 @@ export default function EventCreationForm() {
 
               <div
                 {...getRootProps()}
-                className={`flex-1 border-2 border-dashed min-h-32 flex items-center outline-none justify-center rounded p-4 text-center cursor-pointer
-                ${isDragActive ? 'border-secondary-200 bg-secondary-100' : 'border-secondary-200'}`}
+                className={`flex-1 border-2 border-dashed min-h-32 flex items-center outline-none justify-center rounded p- text-center cursor-pointer
+                ${
+                  isDragActive
+                    ? "border-secondary-200 bg-secondary-100"
+                    : "border-secondary-200"
+                }`}
               >
                 <input {...getInputProps()} />
                 {formData.imageFile || formData.imageUrl ? (
@@ -338,7 +383,7 @@ export default function EventCreationForm() {
                         setFormData((prev) => ({
                           ...prev,
                           imageFile: undefined,
-                          imageUrl: undefined
+                          imageUrl: undefined,
                         }));
                       }}
                       className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
@@ -372,7 +417,9 @@ export default function EventCreationForm() {
             {ticketTypes.map((ticket, index) => (
               <div key={index} className="border p-4 rounded space-y-4">
                 <div className="flex justify-between">
-                  <h4 className="font-medium">{ticket.name || `Ticket Type #${index + 1}`}</h4>
+                  <h4 className="font-medium">
+                    {ticket.name || `Ticket Type #${index + 1}`}
+                  </h4>
 
                   {ticketTypes.length > 1 && (
                     <button
@@ -388,26 +435,36 @@ export default function EventCreationForm() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="col-span-2 md:col-span-1 w-full">
-                    <label htmlFor="name" className="text-sm mb-1 block text-secondary">
+                    <label
+                      htmlFor="name"
+                      className="text-sm mb-1 block text-secondary"
+                    >
                       Ticket Name
                     </label>
                     <input
                       type="text"
                       placeholder="Ticket Name"
                       value={ticket.name}
-                      onChange={(e) => handleTicketTypeChange(index, 'name', e.target.value)}
+                      onChange={(e) =>
+                        handleTicketTypeChange(index, "name", e.target.value)
+                      }
                       className="p-2 border rounded outline-none w-full focus:ring-2 focus:ring-primary-100"
                       required
                     />
                   </div>
 
                   <div className="col-span-2 md:col-span-1 w-full">
-                    <label htmlFor="type" className="text-sm mb-1 block text-secondary">
+                    <label
+                      htmlFor="type"
+                      className="text-sm mb-1 block text-secondary"
+                    >
                       Ticket Type
                     </label>
                     <select
                       value={ticket.type}
-                      onChange={(e) => handleTicketTypeChange(index, 'type', e.target.value)}
+                      onChange={(e) =>
+                        handleTicketTypeChange(index, "type", e.target.value)
+                      }
                       className="p-2 border rounded outline-none w-full focus:ring-2 focus:ring-primary-100"
                       required
                     >
@@ -418,7 +475,10 @@ export default function EventCreationForm() {
                   </div>
 
                   <div className="col-span-2 md:col-span-1 w-full">
-                    <label className="text-sm mb-1 block text-secondary" htmlFor="price">
+                    <label
+                      className="text-sm mb-1 block text-secondary"
+                      htmlFor="price"
+                    >
                       Price
                     </label>
                     <input
@@ -426,7 +486,11 @@ export default function EventCreationForm() {
                       placeholder="Price"
                       value={ticket.price}
                       onChange={(e) =>
-                        handleTicketTypeChange(index, 'price', Number(e.target.value))
+                        handleTicketTypeChange(
+                          index,
+                          "price",
+                          Number(e.target.value)
+                        )
                       }
                       className="p-2 border rounded outline-none w-full focus:ring-2 focus:ring-primary-100"
                       min="0"
@@ -435,7 +499,10 @@ export default function EventCreationForm() {
                   </div>
 
                   <div className="col-span-2 md:col-span-1 w-full">
-                    <label className="text-sm mb-1 block text-secondary" htmlFor="price">
+                    <label
+                      className="text-sm mb-1 block text-secondary"
+                      htmlFor="price"
+                    >
                       Total Available
                     </label>
                     <input
@@ -443,7 +510,11 @@ export default function EventCreationForm() {
                       placeholder="Total Available"
                       value={ticket.total}
                       onChange={(e) =>
-                        handleTicketTypeChange(index, 'total', Number(e.target.value))
+                        handleTicketTypeChange(
+                          index,
+                          "total",
+                          Number(e.target.value)
+                        )
                       }
                       className="p-2 border rounded outline-none w-full focus:ring-2 focus:ring-primary-100"
                       min="1"
@@ -452,30 +523,42 @@ export default function EventCreationForm() {
                   </div>
 
                   <div className="col-span-2 md:col-span-1 w-full">
-                    <label className="text-sm mb-1 block text-secondary" htmlFor="description">
+                    <label
+                      className="text-sm mb-1 block text-secondary"
+                      htmlFor="description"
+                    >
                       Description
                     </label>
                     <textarea
                       placeholder="Description"
                       value={ticket.description}
-                      onChange={(e) => handleTicketTypeChange(index, 'description', e.target.value)}
+                      onChange={(e) =>
+                        handleTicketTypeChange(
+                          index,
+                          "description",
+                          e.target.value
+                        )
+                      }
                       className="p-2 border rounded col-span-2 outline-none w-full focus:ring-2 focus:ring-primary-100"
                     />
                   </div>
 
                   <div className="col-span-2 md:col-span-1 w-full">
-                    <label className="text-sm mb-1 block text-secondary" htmlFor="benefits">
+                    <label
+                      className="text-sm mb-1 block text-secondary"
+                      htmlFor="benefits"
+                    >
                       Benefits
                     </label>
                     <input
                       type="text"
                       placeholder="Benefits (comma-separated)"
-                      value={ticket.benefits?.join(', ') || ''}
+                      value={ticket.benefits?.join(", ") || ""}
                       onChange={(e) =>
                         handleTicketTypeChange(
                           index,
-                          'benefits',
-                          e.target.value.split(',').map((b) => b.trim())
+                          "benefits",
+                          e.target.value.split(",").map((b) => b.trim())
                         )
                       }
                       className="p-2 border rounded col-span-2 w-full outline-none focus:ring-2 focus:ring-primary-100"
@@ -491,10 +574,12 @@ export default function EventCreationForm() {
             disabled={isLoading}
             className={`w-full py-3 rounded text-white font-medium
             ${
-              isLoading ? 'bg-secondary-400/80' : 'bg-secondary hover:bg-secondary-200'
+              isLoading
+                ? "bg-secondary-400/80"
+                : "bg-secondary hover:bg-secondary-200"
             } transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed`}
           >
-            {isLoading ? 'Creating Event...' : 'Create Event'}
+            {isLoading ? "Creating Event..." : "Create Event"}
           </button>
         </div>
       </form>
