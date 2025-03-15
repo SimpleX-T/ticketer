@@ -7,13 +7,8 @@ import {
 } from "react";
 import { auth } from "../services/firebase";
 import { AuthArgs, User } from "../types";
-import {
-  login,
-  signup,
-  logout,
-  getCurrentUser,
-  onAuthStateChanged,
-} from "../hooks/useFirebaseAuth";
+import { getCurrentUser, onAuthStateChanged } from "../hooks/useFirebaseAuth";
+import { login, logout, signup } from "../services/userServices";
 
 type AuthErrorType = string | null;
 
@@ -53,8 +48,11 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState(initialState.isLoading);
   const [error, setError] = useState<AuthErrorType>(initialState.error);
 
+  const clearError = () => setError(null);
+
   // Listen for Firebase auth state changes
   useEffect(() => {
+    clearError();
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setIsLoading(true);
 
@@ -88,8 +86,6 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => unsubscribe();
   }, []);
 
-  const clearError = () => setError(null);
-
   const handleLogin = async (email: string, password: string) => {
     clearError();
 
@@ -105,8 +101,8 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
     try {
       setIsLoading(true);
-      const userData = await login(email, password);
-      setUser(userData);
+      const user = await login(email, password);
+      setUser(user);
       setIsAuthenticated(true);
     } catch (err) {
       let errorMessage = "Login failed";
@@ -155,9 +151,11 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
     try {
       setIsLoading(true);
+
       const newUser = await signup(userData);
-      setUser(newUser as User);
-      setIsAuthenticated(true);
+      console.log(newUser);
+      // setUser(newUser as User);
+      // setIsAuthenticated(true);
     } catch (err) {
       let errorMessage = "Signup failed";
 

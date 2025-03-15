@@ -10,9 +10,10 @@ import { TicketCard } from "./TicketCard";
 import { useQuery } from "@tanstack/react-query";
 import { getUserTickets } from "../../hooks/useFirebaseTickets";
 import TicketCardSkeleton from "./TicketCardSkeleton";
+import { FaSignOutAlt } from "react-icons/fa";
 
 const ClientTickets = () => {
-  const { user } = useAuth();
+  const { user, handleLogout } = useAuth();
   const { deleteTicket } = useAppContext();
   const [openModal, setOpenModal] = useState<boolean>(false);
   // const [userTickets, setUserTickets] = useState<Ticket[]>([]);
@@ -66,7 +67,7 @@ const ClientTickets = () => {
   return (
     <div className="mx-auto p-6 bg-gradient-to-br min-h-screen py-24 from-secondary-300 to-primary-100">
       {/* User Info Section */}
-      <div className="bg-primary p-6 rounded-lg shadow-md">
+      <div className="bg-primary p-6 rounded-lg shadow-md relative">
         <h2 className="text-2xl font-semibold text-secondary">User Profile</h2>
         <p className="text-secondary">
           <strong>Name:</strong> {user?.firstname} {user?.lastname}
@@ -74,6 +75,15 @@ const ClientTickets = () => {
         <p className="text-secondary">
           <strong>Email:</strong> {user?.email}
         </p>
+
+        <button
+          className="absolute top-12 right-12 text-3xl cursor-pointer hover:text-secondary-100 transition-colors duration-300 text-secondary"
+          onClick={() => {
+            handleLogout();
+          }}
+        >
+          <FaSignOutAlt />
+        </button>
       </div>
 
       {/* Tickets List */}

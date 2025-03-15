@@ -1,4 +1,4 @@
-import { FaTicket } from "react-icons/fa6";
+import { FaEye, FaEyeSlash, FaTicket } from "react-icons/fa6";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useForm } from "react-hook-form";
@@ -6,6 +6,7 @@ import { AuthArgs } from "../../types";
 import { useState } from "react";
 
 export default function Signup() {
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const { handleSignup, isLoading, isAuthenticated, error, clearError } =
     useAuth();
   const [agreeToTerms, setAgreeToTerms] = useState<boolean>(false);
@@ -136,19 +137,29 @@ export default function Signup() {
               Password:
             </label>
 
-            <input
-              type="password"
-              placeholder="**********"
-              {...register("password", {
-                required: "Please input your password",
-                minLength: {
-                  value: 8,
-                  message: "Password must be at least 8 characters",
-                },
-                onChange: () => error && clearError(),
-              })}
-              className="px-3 w-full py-2 border rounded-md border-secondary placeholder:text-secondary-100 text-secondary outline-none text-sm"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="**********"
+                {...register("password", {
+                  required: "Please input your password",
+                  minLength: {
+                    value: 8,
+                    message: "Password must be at least 8 characters",
+                  },
+                  onChange: () => error && clearError(),
+                })}
+                className="px-3 w-full py-2 border rounded-md border-secondary placeholder:text-secondary-100 text-secondary outline-none text-sm"
+              />
+
+              <button
+                onClick={() => setShowPassword(!showPassword)}
+                type="button"
+                className="flex items-center justify-center cursor-pointer text-secondary absolute right-1 top-1/2 -translate-y-1/2 p-2 rounded-xs focus:ring-1 focus:ring-secondary focus:outline-none"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
             {errors.password && (
               <span className="text-[10px] text-center text-red-500">
                 {errors.password.message}
@@ -164,17 +175,27 @@ export default function Signup() {
               Confirm Password:
             </label>
 
-            <input
-              type="password"
-              placeholder="**********"
-              {...register("confirmPassword", {
-                required: "Please confirm your password",
-                validate: (val) =>
-                  val === watch("password") || "Passwords do not match",
-                onChange: () => error && clearError(),
-              })}
-              className="px-3 w-full py-2 border rounded-md border-secondary placeholder:text-secondary-100 text-secondary outline-none text-sm"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="**********"
+                {...register("confirmPassword", {
+                  required: "Please confirm your password",
+                  validate: (val) =>
+                    val === watch("password") || "Passwords do not match",
+                  onChange: () => error && clearError(),
+                })}
+                className="px-3 w-full py-2 border rounded-md border-secondary placeholder:text-secondary-100 text-secondary outline-none text-sm"
+              />
+
+              <button
+                onClick={() => setShowPassword(!showPassword)}
+                type="button"
+                className="flex items-center justify-center cursor-pointer text-secondary absolute right-1 top-1/2 -translate-y-1/2 p-2 rounded-xs focus:ring-1 focus:ring-secondary focus:outline-none"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
             {errors.confirmPassword && (
               <span className="text-[10px] text-center text-red-500">
                 {errors.confirmPassword.message}

@@ -6,6 +6,8 @@ import {
   getDoc,
   getDocs,
   writeBatch,
+  query,
+  where,
 } from "firebase/firestore";
 import { db } from "../services/firebase";
 import { Event, EventStatus, TicketType, User } from "../types";
@@ -192,6 +194,90 @@ export const updateEvent = async (
     await batch.commit();
   } catch (error) {
     console.error("Error updating event:", error);
+    throw error;
+  }
+};
+
+// Get all published events
+export const getPublishedEvents = async (): Promise<Event[]> => {
+  try {
+    const eventsRef = collection(db, "events");
+    const eventsQuery = query(
+      eventsRef,
+      where("status", "==", EventStatus.PUBLISHED)
+    );
+    const eventsSnapshot = await getDocs(eventsQuery);
+
+    const events: Event[] = [];
+
+    // Process each event document
+    for (const eventDoc of eventsSnapshot.docs) {
+      const eventData = eventDoc.data() as Omit<Event, "ticketTypes">;
+
+      // Get ticket types from subcollection
+      const ticketTypesRef = collection(eventDoc.ref, "ticketTypes");
+      const ticketTypesSnapshot = await getDocs(ticketTypesRef);
+      const ticketTypes = ticketTypesSnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      })) as TicketType[];
+
+      events.push({
+        ...eventData,
+        ticketTypes,
+      } as Event);
+    }
+
+    // Sort events by creation date (newest first)
+    return events.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  } catch (error) {
+    console.error("Error getting published events:", error);
+    throw error;
+  }
+};
+
+// Get all events for a specific organizer
+export const getOrganizerEvents = async (
+  organizerId: string
+): Promise<Event[]> => {
+  try {
+    const eventsRef = collection(db, "events");
+    const eventsQuery = query(
+      eventsRef,
+      where("organizerId", "==", organizerId)
+    );
+    const eventsSnapshot = await getDocs(eventsQuery);
+
+    const events: Event[] = [];
+
+    // Process each event document
+    for (const eventDoc of eventsSnapshot.docs) {
+      const eventData = eventDoc.data() as Omit<Event, "ticketTypes">;
+
+      // Get ticket types from subcollection
+      const ticketTypesRef = collection(eventDoc.ref, "ticketTypes");
+      const ticketTypesSnapshot = await getDocs(ticketTypesRef);
+      const ticketTypes = ticketTypesSnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      })) as TicketType[];
+
+      events.push({
+        ...eventData,
+        ticketTypes,
+      } as Event);
+    }
+
+    // Sort events by creation date (newest first)
+    return events.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  } catch (error) {
+    console.error("Error getting organizer events:", error);
     throw error;
   }
 };

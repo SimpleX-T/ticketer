@@ -1,7 +1,8 @@
-import { FaTicket } from "react-icons/fa6";
+import { FaEye, FaEyeSlash, FaTicket } from "react-icons/fa6";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 
 // Define a type for login form data
 interface LoginFormData {
@@ -10,6 +11,7 @@ interface LoginFormData {
 }
 
 export default function Login() {
+  const [showPassword, setShowPassword] = useState(false);
   const { handleLogin, isLoading, error, isAuthenticated, clearError } =
     useAuth();
   const location = useLocation();
@@ -84,16 +86,24 @@ export default function Login() {
             >
               Password:
             </label>
-
-            <input
-              type="password"
-              placeholder="**********"
-              {...register("password", {
-                required: "Please input your password",
-                onChange: () => error && clearError(),
-              })}
-              className="px-3 w-full py-2 border rounded-md border-secondary placeholder:text-secondary-100 text-secondary outline-none text-sm"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="**********"
+                {...register("password", {
+                  required: "Please input your password",
+                  onChange: () => error && clearError(),
+                })}
+                className="px-3 w-full py-2 border rounded-md border-secondary placeholder:text-secondary-100 text-secondary outline-none text-sm"
+              />
+              <button
+                onClick={() => setShowPassword(!showPassword)}
+                type="button"
+                className="flex items-center justify-center cursor-pointer text-secondary absolute right-1 top-1/2 -translate-y-1/2 p-2 rounded-xs focus:ring-1 focus:ring-secondary focus:outline-none"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
             {errors.password && (
               <span className="text-[10px] text-center text-red-500">
                 {errors.password.message}
@@ -101,16 +111,16 @@ export default function Login() {
             )}
           </div>
 
-          {/* Display Firebase auth errors */}
+          {/* Display Supabase auth errors */}
           {error && (
-            <span className="text-xs text-center block text-red-500">
+            <span className="text-xs text-center block text-red-500 bg-red-200 p-2 rounded-md">
               {error}
             </span>
           )}
 
           <button
             type="submit"
-            className="px-3 mt-4 w-full py-2 border rounded-md border-secondary text-secondary outline-none text-sm flex items-center justify-center gap-4 cursor-pointer hover:bg-primary transition-colors duration-300"
+            className="px-3 mt-4 w-full py-2 border rounded-md border-secondary text-secondary outline-none text-sm flex items-center justify-center gap-4 cursor-pointer hover:bg-primary transition-colors duration-300 focus:ring-2 focus:ring-secondary"
             disabled={isLoading}
           >
             {isLoading ? (
