@@ -1,19 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useCallback, useEffect } from "react";
-import { useDropzone } from "react-dropzone";
-import { Event, EventStatus, TicketType } from "../../types";
+import React, { useState, useEffect } from "react";
+import { Event, TicketType } from "../../types";
 import { useAuth } from "../../contexts/AuthContext";
-import { createEvent } from "../../hooks/useFirebaseEvents";
 import { FaPlus, FaX } from "react-icons/fa6";
 import { ScrollRestoration, useNavigate } from "react-router-dom";
-// import { toast } from 'react-hot-toast';
-import SeedDatabase from "../admin/SeedDatabase";
-
-interface EventForm
-  extends Omit<Event, "id" | "createdAt" | "ticketsSold" | "soldOut"> {
-  imageFile?: File;
-  imageUrl?: string;
-}
+import { createEvent } from "../../services/eventServices";
+import FormInput from "./FormInput";
+import { TicketTypeForm } from "./TicketTypeForm";
+import ImagePreview from "./ImagePreview";
 
 const INITIAL_TICKET_TYPE: TicketType = {
   id: "",
@@ -26,9 +19,6 @@ const INITIAL_TICKET_TYPE: TicketType = {
   benefits: [],
 };
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/gif"];
-
 export default function EventCreationForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -37,20 +27,22 @@ export default function EventCreationForm() {
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
     { ...INITIAL_TICKET_TYPE },
   ]);
+  const [imageFile, setImageFile] = useState<File | undefined>(undefined);
+  const [imageUrl, setImageUrl] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<EventForm>({
+  const [formData, setFormData] = useState<
+    Omit<Event, "id" | "createdAt" | "ticketsSold" | "soldOut">
+  >({
     name: "",
     date: "",
     location: "",
     description: "",
     image: "",
-    imageFile: undefined,
     ticketTypes: [],
     organizerId: user?.id || "",
     maxTicketsPerUser: 4,
     category: "",
-    status: EventStatus.DRAFT,
     totalCapacity: 0,
   });
 
@@ -76,47 +68,6 @@ export default function EventCreationForm() {
     return null;
   };
 
-  const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      const file = acceptedFiles[0];
-      if (!file) return;
-
-      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-        alert("Invalid file type. Please upload a JPEG, PNG, or GIF");
-        return;
-      }
-
-      if (file.size > MAX_FILE_SIZE) {
-        alert("File too large. Maximum size is 5MB");
-        return;
-      }
-
-      // Cleanup old preview URL if exists
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-
-      const newPreviewUrl = URL.createObjectURL(file);
-      setPreviewUrl(newPreviewUrl);
-
-      setFormData((prev) => ({
-        ...prev,
-        imageFile: file,
-        imageUrl: undefined,
-      }));
-    },
-    [previewUrl]
-  );
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      "image/*": [".jpeg", ".jpg", ".png", ".gif"],
-    },
-    maxFiles: 1,
-    maxSize: MAX_FILE_SIZE,
-  });
-
   const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
 
@@ -125,11 +76,8 @@ export default function EventCreationForm() {
     }
     setPreviewUrl(null);
 
-    setFormData((prev) => ({
-      ...prev,
-      imageUrl: url,
-      imageFile: undefined,
-    }));
+    setImageFile(undefined);
+    setImageUrl(url);
   };
 
   const handleTicketTypeChange = (
@@ -178,7 +126,13 @@ export default function EventCreationForm() {
     try {
       // Validate form
       if (!formData.name.trim()) throw new Error("Event name is required");
+
       if (!formData.date) throw new Error("Event date is required");
+      const eventDateTime = new Date(formData.date);
+      const tenMinutesFromNow = new Date(Date.now() + 10 * 60 * 1000);
+      if (eventDateTime <= tenMinutesFromNow)
+        throw new Error("Event must be at least 10 minutes in the future");
+
       if (!formData.location.trim()) throw new Error("Location is required");
       if (!formData.description.trim())
         throw new Error("Description is required");
@@ -187,15 +141,15 @@ export default function EventCreationForm() {
       const ticketError = validateTicketTypes(ticketTypes);
       if (ticketError) throw new Error(ticketError);
 
-      if (!formData.imageFile && !formData.imageUrl) {
+      if (!imageFile && !imageUrl) {
         throw new Error("Please provide an image URL or upload an image");
       }
 
-      let imageUrl = formData.imageUrl;
+      let _imageUrl = imageUrl;
 
-      if (formData.imageFile) {
+      if (imageFile) {
         const _formData = new FormData();
-        _formData.append("file", formData.imageFile);
+        _formData.append("file", imageFile);
         _formData.append(
           "upload_preset",
           import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET!
@@ -214,24 +168,19 @@ export default function EventCreationForm() {
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || "Upload failed");
 
-        imageUrl = data.secure_url;
+        _imageUrl = data.secure_url;
       }
-      const {
-        imageFile,
-        imageUrl: imgUrl,
-        ...formDataWithoutImages
-      } = formData;
 
-      const eventData: EventForm = {
-        ...formDataWithoutImages,
-        image: imageUrl!,
-        ticketTypes: ticketTypes.map(({ id, ...rest }) => ({
-          ...rest,
-          id: "",
-        })),
+      const eventData: Omit<
+        Event,
+        "id" | "createdAt" | "ticketsSold" | "soldOut"
+      > = {
+        ...formData,
+        image: _imageUrl!,
+        ticketTypes,
       };
 
-      await createEvent(eventData, user!);
+      await createEvent(eventData);
       navigate("/dashboard");
     } catch (err) {
       const errorMessage =
@@ -258,14 +207,14 @@ export default function EventCreationForm() {
             <h2 className="text-xl font-medium text-secondary">
               Create New Event
             </h2>
-            {/* <button
+            <button
               type="button"
               onClick={() => navigate(-1)}
               className="text-secondary hover:text-secondary-200"
             >
               Back
-            </button> */}
-            <SeedDatabase />
+            </button>
+            {/* <SeedDatabase /> */}
           </div>
 
           {error && (
@@ -282,18 +231,19 @@ export default function EventCreationForm() {
 
           {/* Basic Event Details */}
           <div className="space-y-4">
-            <input
+            <FormInput<string>
               type="text"
               placeholder="Event Name"
               value={formData.name}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, name: e.target.value }))
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setFormData((prev) => ({ ...prev, name: e.target?.value }))
               }
-              className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
               required
+              name="event-name"
+              className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
             />
 
-            <input
+            <FormInput<string>
               type="datetime-local"
               value={formData.date}
               onChange={(e) =>
@@ -303,7 +253,7 @@ export default function EventCreationForm() {
               required
             />
 
-            <input
+            <FormInput<string>
               type="text"
               placeholder="Location"
               value={formData.location}
@@ -327,9 +277,10 @@ export default function EventCreationForm() {
               required
             />
 
-            <input
+            <FormInput<string>
               type="text"
               placeholder="Category"
+              list="categories"
               value={formData.category}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, category: e.target.value }))
@@ -343,58 +294,26 @@ export default function EventCreationForm() {
           <div className="space-y-4 mb-8">
             <div className="flex flex-col gap-4">
               <div className="flex-1">
-                <input
+                <FormInput<string>
                   type="text"
                   placeholder="Image URL"
-                  value={formData.imageUrl || ""}
+                  value={imageUrl || ""}
                   onChange={handleImageUrlChange}
                   className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
-                  disabled={!!formData.imageFile}
+                  disabled={!!imageFile}
                 />
               </div>
 
-              <div className="text-center">OR</div>
+              <p className="text-center">OR</p>
 
-              <div
-                {...getRootProps()}
-                className={`flex-1 border-2 border-dashed min-h-32 flex items-center outline-none justify-center rounded p- text-center cursor-pointer
-                ${
-                  isDragActive
-                    ? "border-secondary-200 bg-secondary-100"
-                    : "border-secondary-200"
-                }`}
-              >
-                <input {...getInputProps()} />
-                {formData.imageFile || formData.imageUrl ? (
-                  <div className="w-full h-32 relative">
-                    <img
-                      src={previewUrl || formData.imageUrl}
-                      alt="Preview"
-                      className="w-full h-full object-cover rounded"
-                    />
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (previewUrl) {
-                          URL.revokeObjectURL(previewUrl);
-                        }
-                        setPreviewUrl(null);
-                        setFormData((prev) => ({
-                          ...prev,
-                          imageFile: undefined,
-                          imageUrl: undefined,
-                        }));
-                      }}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
-                    >
-                      <FaX size={12} />
-                    </button>
-                  </div>
-                ) : (
-                  <p>Drag & drop an image here, or click to select</p>
-                )}
-              </div>
+              <ImagePreview
+                imageFile={imageFile}
+                imageUrl={imageUrl}
+                previewUrl={previewUrl}
+                setPreviewUrl={setPreviewUrl}
+                setImageFile={setImageFile}
+                setImageUrl={setImageUrl}
+              />
             </div>
           </div>
 
@@ -415,157 +334,14 @@ export default function EventCreationForm() {
             </div>
 
             {ticketTypes.map((ticket, index) => (
-              <div key={index} className="border p-4 rounded space-y-4">
-                <div className="flex justify-between">
-                  <h4 className="font-medium">
-                    {ticket.name || `Ticket Type #${index + 1}`}
-                  </h4>
-
-                  {ticketTypes.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeTicketType(index)}
-                      title="Remove ticket"
-                      className="bg-red-500 p-1 shadow-sm shadow-red-600 cursor-pointer text-red-200 font-bold rounded-full w-4 h-4 flex items-center justify-center hover:bg-red-700 hover:shadow-none"
-                    >
-                      <FaX size={14} />
-                    </button>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="col-span-2 md:col-span-1 w-full">
-                    <label
-                      htmlFor="name"
-                      className="text-sm mb-1 block text-secondary"
-                    >
-                      Ticket Name
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ticket Name"
-                      value={ticket.name}
-                      onChange={(e) =>
-                        handleTicketTypeChange(index, "name", e.target.value)
-                      }
-                      className="p-2 border rounded outline-none w-full focus:ring-2 focus:ring-primary-100"
-                      required
-                    />
-                  </div>
-
-                  <div className="col-span-2 md:col-span-1 w-full">
-                    <label
-                      htmlFor="type"
-                      className="text-sm mb-1 block text-secondary"
-                    >
-                      Ticket Type
-                    </label>
-                    <select
-                      value={ticket.type}
-                      onChange={(e) =>
-                        handleTicketTypeChange(index, "type", e.target.value)
-                      }
-                      className="p-2 border rounded outline-none w-full focus:ring-2 focus:ring-primary-100"
-                      required
-                    >
-                      <option value="regular">Regular</option>
-                      <option value="vip">VIP</option>
-                      <option value="vvip">VVIP</option>
-                    </select>
-                  </div>
-
-                  <div className="col-span-2 md:col-span-1 w-full">
-                    <label
-                      className="text-sm mb-1 block text-secondary"
-                      htmlFor="price"
-                    >
-                      Price
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="Price"
-                      value={ticket.price}
-                      onChange={(e) =>
-                        handleTicketTypeChange(
-                          index,
-                          "price",
-                          Number(e.target.value)
-                        )
-                      }
-                      className="p-2 border rounded outline-none w-full focus:ring-2 focus:ring-primary-100"
-                      min="0"
-                      required
-                    />
-                  </div>
-
-                  <div className="col-span-2 md:col-span-1 w-full">
-                    <label
-                      className="text-sm mb-1 block text-secondary"
-                      htmlFor="price"
-                    >
-                      Total Available
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="Total Available"
-                      value={ticket.total}
-                      onChange={(e) =>
-                        handleTicketTypeChange(
-                          index,
-                          "total",
-                          Number(e.target.value)
-                        )
-                      }
-                      className="p-2 border rounded outline-none w-full focus:ring-2 focus:ring-primary-100"
-                      min="1"
-                      required
-                    />
-                  </div>
-
-                  <div className="col-span-2 md:col-span-1 w-full">
-                    <label
-                      className="text-sm mb-1 block text-secondary"
-                      htmlFor="description"
-                    >
-                      Description
-                    </label>
-                    <textarea
-                      placeholder="Description"
-                      value={ticket.description}
-                      onChange={(e) =>
-                        handleTicketTypeChange(
-                          index,
-                          "description",
-                          e.target.value
-                        )
-                      }
-                      className="p-2 border rounded col-span-2 outline-none w-full focus:ring-2 focus:ring-primary-100"
-                    />
-                  </div>
-
-                  <div className="col-span-2 md:col-span-1 w-full">
-                    <label
-                      className="text-sm mb-1 block text-secondary"
-                      htmlFor="benefits"
-                    >
-                      Benefits
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Benefits (comma-separated)"
-                      value={ticket.benefits?.join(", ") || ""}
-                      onChange={(e) =>
-                        handleTicketTypeChange(
-                          index,
-                          "benefits",
-                          e.target.value.split(",").map((b) => b.trim())
-                        )
-                      }
-                      className="p-2 border rounded col-span-2 w-full outline-none focus:ring-2 focus:ring-primary-100"
-                    />
-                  </div>
-                </div>
-              </div>
+              <TicketTypeForm
+                key={index}
+                index={index}
+                ticket={ticket}
+                ticketTypes={ticketTypes}
+                removeTicketType={removeTicketType}
+                handleTicketTypeChange={handleTicketTypeChange}
+              />
             ))}
           </div>
 

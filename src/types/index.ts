@@ -85,7 +85,6 @@ export interface Event {
   createdAt: string;
   maxTicketsPerUser: number;
   category: string;
-  status: EventStatus;
   totalCapacity: number;
   ticketsSold: number;
 }

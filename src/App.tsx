@@ -8,7 +8,7 @@ import Login from "./pages/auth/login";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AppProvider } from "./contexts/AppContext";
 import UserDashboard from "./pages/dashboard";
-import CreateEvent from "./components/createEvent";
+import CreateEvent from "./pages/CreateEvent";
 import Signup from "./pages/auth/signup";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 

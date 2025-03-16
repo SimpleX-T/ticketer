@@ -1,10 +1,11 @@
 import { Link, NavLink } from "react-router-dom";
 import { useAppContext } from "../../contexts/AppContext";
 import { useEffect, useState } from "react";
-import { FaTicketAlt, FaCalendarAlt, FaUserCircle } from "react-icons/fa";
+import { FaTicketAlt, FaUserCircle } from "react-icons/fa";
 import { HiMenu, HiX } from "react-icons/hi";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../../contexts/AuthContext";
+import { navItems } from "../../utils/constants";
 
 export default function Header() {
   const { userTickets } = useAppContext();
@@ -24,20 +25,14 @@ export default function Header() {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  const navItems = [
-    { path: "/events", label: "Explore Events", icon: FaCalendarAlt },
-    { path: "/create-event", label: "Host Event", icon: FaCalendarAlt },
-    { path: "/about", label: "About Us", icon: null },
-  ];
-
   return (
-    <header className="px-4 py-2 flex z-[999] justify-between items-center bg-primary-300/70 border border-secondary-100 fixed top-4 left-1/2 -translate-x-1/2 max-w-6xl mx-auto w-[95%] rounded-md md:rounded-full backdrop-blur-md shadow-lg">
+    <header className="px-4 py-2 flex z-[999] justify-between items-center bg-primary-300/70 border border-secondary-100 fixed top-4 left-1/2 -translate-x-1/2 max-w-6xl mx-auto w-[95%] rounded-md lg:rounded-full backdrop-blur-md shadow-lg">
       <Link to="/" className="w-[80px] md:w-[150px]">
         <img src="/logo.svg" alt="Tesarus" className="h-10 md:h-12" />
       </Link>
 
       {/* Desktop Navigation */}
-      <nav className="hidden md:flex items-center space-x-1 mx-4">
+      <nav className="hidden lg:flex items-center space-x-1 mx-4">
         {navItems.map((item) => (
           <NavLink
             key={item.path}
@@ -60,12 +55,12 @@ export default function Header() {
         {/* Tickets Button */}
         <Link
           to="/dashboard"
-          className={`relative border text-secondary p-2 md:px-4 py-2 rounded-full hidden md:flex items-center ${
+          className={`relative border text-secondary p-2 md:px-4 py-2 rounded-full hidden lg:flex items-center ${
             addEffect ? "bg-white/40" : "bg-primary-300"
           } hover:bg-primary-100 transition-colors duration-300`}
         >
           <FaTicketAlt className="mr-2" />
-          <span className="hidden md:inline">MY TICKETS</span>
+          <span>MY TICKETS</span>
           {userTickets.length > 0 && (
             <span className="absolute -top-2 -right-2 w-5 h-5 text-xs text-white rounded-full flex items-center justify-center bg-secondary">
               {userTickets.length}
@@ -92,7 +87,7 @@ export default function Header() {
 
         {/* Mobile Menu Toggle */}
         <button
-          className="md:hidden p-2 text-secondary rounded-full hover:bg-primary-100/30 transition-colors duration-300"
+          className="lg:hidden p-2 text-secondary rounded-full hover:bg-primary-100/30 transition-colors duration-300"
           onClick={toggleMobileMenu}
         >
           {mobileMenuOpen ? (
