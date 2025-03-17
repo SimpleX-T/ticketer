@@ -13,7 +13,7 @@ import { db } from "../services/firebase";
 import {
   Ticket,
   TicketPurchaseData,
-  TicketStatus,
+  // TicketStatus,
   TicketType,
   User,
   Event,
@@ -37,10 +37,6 @@ export const bookTickets = async (
       }
 
       const eventData = eventDoc.data() as Event;
-
-      if (eventData.status !== "PUBLISHED") {
-        throw new Error("Cannot purchase tickets for unpublished events");
-      }
 
       // Check if event is sold out
       if (eventData.soldOut) {
@@ -107,7 +103,6 @@ export const bookTickets = async (
           eventId: purchaseData.eventId,
           userId: currentUser.id,
           purchaseDate: new Date().toISOString(),
-          status: TicketStatus.PURCHASED,
           price: ticketType.price,
           ticketCode,
           isTransferred: false,
@@ -252,7 +247,6 @@ export const getUserTickets = async (userId: string) => {
         eventId: eventData.id,
         userId: ticketData.userId,
         purchaseDate: ticketData.purchaseDate,
-        status: ticketData.status,
         price: ticketData.price,
         ticketCode: ticketData.ticketCode,
         isTransferred: ticketData.isTransferred,
@@ -286,21 +280,12 @@ export const cancelTicket = async (ticketId: string, currentUser: User) => {
       throw new Error("Unauthorized to cancel this ticket");
     }
 
-    // Check if ticket is already used or cancelled
-    if (
-      ticketData.status === TicketStatus.USED ||
-      ticketData.status === TicketStatus.CANCELLED ||
-      ticketData.status === TicketStatus.REFUNDED
-    ) {
-      throw new Error(`Ticket is already ${ticketData.status.toLowerCase()}`);
-    }
-
     // Run in transaction to ensure consistency
     await runTransaction(db, async (transaction) => {
       // Update ticket status
-      transaction.update(ticketRef, {
-        status: TicketStatus.CANCELLED,
-      });
+      // transaction.update(ticketRef, {
+      //   status: TicketStatus.CANCELLED,
+      // });
 
       // Increment available tickets in the ticket type
       const ticketTypeRef = doc(

@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { CgMail } from "react-icons/cg";
-import { FaCloudArrowUp } from "react-icons/fa6";
+// import { FaCloudArrowUp } from "react-icons/fa6";
 import { AttendeeFormProps } from "../../types";
 import { useAppContext } from "../../contexts/AppContext";
+import { useForm } from "react-hook-form";
+
+
 
 export const AttendeeForm: React.FC<AttendeeFormProps> = ({
   ticketData,
@@ -11,21 +14,23 @@ export const AttendeeForm: React.FC<AttendeeFormProps> = ({
   onSubmit,
 }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { addTicket } = useAppContext();
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setTicketData({
-          ...ticketData,
-          profileImage: reader.result as string,
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const { addTicket } = useAppContext();
+  const { register, handleSubmit, formState: { errors: formErrors } } = useForm();
+
+  // const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setTicketData({
+  //         ...ticketData,
+  //         profileImage: reader.result as string,
+  //       });
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -41,8 +46,7 @@ export const AttendeeForm: React.FC<AttendeeFormProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = (data) => {
     if (validateForm()) {
       addTicket(ticketData);
       onSubmit();
@@ -51,8 +55,8 @@ export const AttendeeForm: React.FC<AttendeeFormProps> = ({
 
   return (
     <div className="bg-primary-400 border border-secondary-200 rounded-xl p-8">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
+      <form onSubmit={handleSubmit(submit)} className="space-y-6">
+        {/* <div>
           <h3 className="text-white font-serif mb-4">Upload profile photo</h3>
 
           <div className="w-full p-4 flex items-center justify-center bg-black/20">
@@ -87,7 +91,7 @@ export const AttendeeForm: React.FC<AttendeeFormProps> = ({
           )}
         </div>
 
-        <hr className="border-2 border-secondary-200 my-8" />
+        <hr className="border-2 border-secondary-200 my-8" /> */}
 
         <div>
           <label
@@ -99,7 +103,7 @@ export const AttendeeForm: React.FC<AttendeeFormProps> = ({
           <input
             type="text"
             id="name"
-            value={ticketData.userName}
+            value={ticketData.}
             onChange={(e) =>
               setTicketData({ ...ticketData, userName: e.target.value })
             }

@@ -1,9 +1,8 @@
-import { ChangeEventHandler } from "react";
-
 export interface User {
   id: string;
   firstname: string;
   lastname: string;
+  displayName?: string;
   email: string;
   role?: "admin" | "user" | "organizer";
   profileImage?: string | null;
@@ -27,7 +26,6 @@ export interface Ticket {
   eventId: string;
   userId: string;
   purchaseDate: string;
-  status: TicketStatus;
   price: number;
   ticketCode: string;
   isTransferred: boolean;
@@ -35,33 +33,23 @@ export interface Ticket {
   specialRequests?: string;
 }
 
-export enum TicketStatus {
-  RESERVED = "RESERVED",
-  PURCHASED = "PURCHASED",
-  USED = "USED",
-  CANCELLED = "CANCELLED",
-  REFUNDED = "REFUNDED",
-}
-
 export interface TicketSelectionProps {
-  event: Event | undefined;
-  selectedTicket?: TicketType | null;
-  onSelectTicket: (ticket: TicketType) => void;
+  event: Event | null;
+  selectedTicket?: string | null;
+  onSelectTicket: (id: string) => void;
   onNext: () => void;
-  ticketCount: number;
-  onChangeTicketCount: ChangeEventHandler<HTMLSelectElement>;
 }
 
 export interface AttendeeFormProps {
-  event: Event | undefined;
-  ticketData: Ticket;
-  setTicketData: React.Dispatch<React.SetStateAction<Ticket>>;
+  event: Event | null;
+  ticketData: Omit<Ticket, "id">;
+  setTicketData: React.Dispatch<React.SetStateAction<Omit<Ticket, "id">>>;
   onBack: () => void;
   onSubmit: () => void;
 }
 
 export interface GeneratedTicketProps {
-  ticketData: Ticket;
+  ticketData: Omit<Ticket, "id">;
   onBookAnother?: () => void;
 }
 

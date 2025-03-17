@@ -7,34 +7,34 @@ import { FaArrowRight, FaMarker } from "react-icons/fa6";
 import { FiSearch } from "react-icons/fi";
 
 export default function Events() {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [categoryFilter, setCategoryFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
-    // Fetch real events from Firestore using React Query
-    const { data: events = [], isLoading, error } = usePublishedEvents();
+  // Fetch real events from Firestore using React Query
+  const { data: events = [], isLoading, error } = usePublishedEvents();
 
-    // Filter events based on search term and category
-    const filteredEvents = events.filter((event) => {
-      const matchesSearch =
-        event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory =
-        categoryFilter === "all" || event.category === categoryFilter;
-      return matchesSearch && matchesCategory;
-    });
+  // Filter events based on search term and category
+  const filteredEvents = events.filter((event) => {
+    const matchesSearch =
+      event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      categoryFilter === "all" || event.category === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
 
-    // Fallback to mock events if there's an error or no events are available
-    const displayEvents =
-      filteredEvents.length > 0 ? filteredEvents : error ? mockEvents : [];
+  // Fallback to mock events if there's an error or no events are available
+  const displayEvents =
+    filteredEvents.length > 0 ? filteredEvents : error ? mockEvents : [];
 
-    // Categories for filtering
-    const categories = [
-      { id: "all", name: "All Events" },
-      { id: "concert", name: "Concerts" },
-      { id: "conference", name: "Conferences" },
-      { id: "workshop", name: "Workshops" },
-      { id: "sport", name: "Sports" },
-    ];
+  // Categories for filtering
+  const categories = [
+    { id: "all", name: "All Events" },
+    { id: "concert", name: "Concerts" },
+    { id: "conference", name: "Conferences" },
+    { id: "workshop", name: "Workshops" },
+    { id: "sport", name: "Sports" },
+  ];
 
   return (
     <section
@@ -167,9 +167,6 @@ export default function Events() {
 
                     <div className="mt-auto pt-4 border-t border-secondary/10 flex justify-between items-center">
                       <div className="relative flex items-center h-10 overflow-hidden">
-                        {/* <span className="flex items-center justify-center bg-secondary/10 hover:bg-secondary/20 text-secondary px-3 border-secondary border h-full transition-colors duration-300">
-                            <FaArrowRight />
-                          </span> */}
                         <span className="text-md bg-secondary/10 hover:bg-secondary/20 text-secondary px-3 py-1 transition-colors duration-300 border border-r-transparent h-full flex items-center">
                           View Details
                         </span>
@@ -178,30 +175,6 @@ export default function Events() {
                         </span>
                       </div>
                     </div>
-
-                    {/* <div className="space-y-3">
-                    {Object.entries(event.prices).map(([type, price]) => (
-                      <button
-                        key={type}
-                        onClick={() =>
-                          handleBuyTicket(
-                            event,
-                            type as "REGULAR" | "VIP" | "VVIP"
-                          )
-                        }
-                        disabled={event.soldOut}
-                        className={`w-full flex justify-between items-center p-3 rounded-lg
-                            ${
-                              event.soldOut
-                                ? "bg-gray-100 cursor-not-allowed"
-                                : "bg-blue-50 hover:bg-blue-100"
-                            }`}
-                      >
-                        <span>{type}</span>
-                        <span className="font-semibold">${price}</span>
-                      </button>
-                    ))}
-                  </div> */}
                   </div>
                 </Link>
               </motion.div>
