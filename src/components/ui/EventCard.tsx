@@ -5,7 +5,7 @@ import { formatDateString } from "../../utils/helpers";
 import { FaArrowRight, FaMapMarkerAlt } from "react-icons/fa";
 
 export const EventCard = ({ event }: { event: Event }) => {
-  const isPastEvent = new Date(event.date) < new Date();
+  const isPastEvent = new Date(event.endDate) < new Date();
   const category = categoryTags.find((cat) => cat.value === event.category) || {
     backgroundColor: "#6c757d",
     textColor: "#ffffff",
@@ -58,7 +58,7 @@ export const EventCard = ({ event }: { event: Event }) => {
 
         {/* Event Date */}
         <p className="text-secondary-100 text-sm">
-          {formatDateString(event.date)}
+          {formatDateString(event.startDate)}
         </p>
 
         {/* Location */}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Event, TicketType } from "../../types";
+// import { Event, TicketType } from "../../types";
 import { useAuth } from "../../contexts/AuthContext";
 import { FaPlus, FaX } from "react-icons/fa6";
 import { ScrollRestoration, useNavigate } from "react-router-dom";
@@ -7,44 +7,50 @@ import { createEvent } from "../../services/eventServices";
 import FormInput from "./FormInput";
 import { TicketTypeForm } from "./TicketTypeForm";
 import ImagePreview from "./ImagePreview";
-
-const INITIAL_TICKET_TYPE: TicketType = {
-  id: "",
-  name: "",
-  price: 0,
-  type: "regular",
-  available: 0,
-  total: 0,
-  description: "",
-  benefits: [],
-};
+// import { INITIAL_TICKET_TYPE } from "../../utils/constants";
+import { useEventForm } from "../../hooks/useCreateEventForm";
 
 export default function EventCreationForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
-    { ...INITIAL_TICKET_TYPE },
-  ]);
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [error, setError] = useState<string | null>(null);
+  // const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
+  //   { ...INITIAL_TICKET_TYPE },
+  // ]);
   const [imageFile, setImageFile] = useState<File | undefined>(undefined);
   const [imageUrl, setImageUrl] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<
-    Omit<Event, "id" | "createdAt" | "ticketsSold" | "soldOut">
-  >({
-    name: "",
-    date: "",
-    location: "",
-    description: "",
-    image: "",
-    ticketTypes: [],
-    organizerId: user?.id || "",
-    maxTicketsPerUser: 4,
-    category: "",
-    totalCapacity: 0,
-  });
+  const {
+    formData,
+    ticketTypes,
+    handleImageUrlChange,
+    handleTicketTypeChange,
+    addTicketType,
+    removeTicketType,
+    handleSubmit,
+    isLoading,
+    error,
+    setError,
+    setFormData,
+  } = useEventForm(createEvent);
+
+  // const [formData, setFormData] = useState<
+  //   Omit<Event, "id" | "createdAt" | "ticketsSold" | "soldOut">
+  // >({
+  //   name: "",
+  //   startDate: "",
+  //   endDate: "",
+  //   location: "",
+  //   description: "",
+  //   image: "",
+  //   ticketTypes: [],
+  //   organizerId: user?.id || "",
+  //   maxTicketsPerUser: 4,
+  //   category: "",
+  //   totalCapacity: 0,
+  // });
 
   // Cleanup preview URL when component unmounts
   useEffect(() => {
@@ -55,141 +61,142 @@ export default function EventCreationForm() {
     };
   }, [previewUrl]);
 
-  const validateTicketTypes = (types: TicketType[]): string | null => {
-    if (types.length === 0) return "At least one ticket type is required";
+  // const validateTicketTypes = (types: TicketType[]): string | null => {
+  //   if (types.length === 0) return "At least one ticket type is required";
 
-    for (const ticket of types) {
-      if (!ticket.name.trim()) return "Ticket name is required";
-      if (ticket.price < 0) return "Price cannot be negative";
-      if (ticket.total < 1) return "Total tickets must be at least 1";
-      if (!ticket.type) return "Ticket type is required";
-    }
+  //   for (const ticket of types) {
+  //     if (!ticket.name.trim()) return "Ticket name is required";
+  //     if (ticket.price < 0) return "Price cannot be negative";
+  //     if (ticket.total < 1) return "Total tickets must be at least 1";
+  //     if (!ticket.type) return "Ticket type is required";
+  //   }
 
-    return null;
-  };
+  //   return null;
+  // };
 
-  const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value;
+  // const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const url = e.target.value;
 
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-    setPreviewUrl(null);
+  //   if (previewUrl) {
+  //     URL.revokeObjectURL(previewUrl);
+  //   }
+  //   setPreviewUrl(null);
 
-    setImageFile(undefined);
-    setImageUrl(url);
-  };
+  //   setImageFile(undefined);
+  //   setImageUrl(url);
+  // };
 
-  const handleTicketTypeChange = (
-    index: number,
-    field: keyof TicketType,
-    value: number | string | string[]
-  ) => {
-    const newTicketTypes = [...ticketTypes];
-    newTicketTypes[index] = {
-      ...newTicketTypes[index],
-      [field]: value,
-    };
-    setTicketTypes(newTicketTypes);
+  // const handleTicketTypeChange = (
+  //   index: number,
+  //   field: keyof TicketType,
+  //   value: number | string | string[]
+  // ) => {
+  //   const newTicketTypes = [...ticketTypes];
+  //   newTicketTypes[index] = {
+  //     ...newTicketTypes[index],
+  //     [field]: value,
+  //   };
+  //   setTicketTypes(newTicketTypes);
 
-    // Update total capacity
-    if (field === "total") {
-      const totalCapacity = newTicketTypes.reduce(
-        (sum, ticket) => sum + Number(ticket.total),
-        0
-      );
-      setFormData((prev) => ({ ...prev, totalCapacity }));
-    }
-  };
+  //   // Update total capacity
+  //   if (field === "total") {
+  //     const totalCapacity = newTicketTypes.reduce(
+  //       (sum, ticket) => sum + Number(ticket.total),
+  //       0
+  //     );
+  //     setFormData((prev) => ({ ...prev, totalCapacity }));
+  //   }
+  // };
 
-  const addTicketType = () => {
-    setTicketTypes((prev) => [...prev, { ...INITIAL_TICKET_TYPE }]);
-  };
+  // const addTicketType = () => {
+  //   setTicketTypes((prev) => [...prev, { ...INITIAL_TICKET_TYPE }]);
+  // };
 
-  const removeTicketType = (index: number) => {
-    setTicketTypes((prev) => {
-      const newTypes = prev.filter((_, i) => i !== index);
-      const totalCapacity = newTypes.reduce(
-        (sum, ticket) => sum + ticket.total,
-        0
-      );
-      setFormData((prev) => ({ ...prev, totalCapacity }));
-      return newTypes;
-    });
-  };
+  // const removeTicketType = (index: number) => {
+  //   setTicketTypes((prev) => {
+  //     const newTypes = prev.filter((_, i) => i !== index);
+  //     const totalCapacity = newTypes.reduce(
+  //       (sum, ticket) => sum + ticket.total,
+  //       0
+  //     );
+  //     setFormData((prev) => ({ ...prev, totalCapacity }));
+  //     return newTypes;
+  //   });
+  // };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setIsLoading(true);
+  //   setError(null);
 
-    try {
-      // Validate form
-      if (!formData.name.trim()) throw new Error("Event name is required");
+  //   try {
+  //     // Validate form
+  //     if (!formData.name.trim()) throw new Error("Event name is required");
 
-      if (!formData.date) throw new Error("Event date is required");
-      const eventDateTime = new Date(formData.date);
-      const tenMinutesFromNow = new Date(Date.now() + 10 * 60 * 1000);
-      if (eventDateTime <= tenMinutesFromNow)
-        throw new Error("Event must be at least 10 minutes in the future");
+  //     if (!formData.startDate || !formData.endDate)
+  //       throw new Error("Event date is required");
+  //     const eventEndDate = new Date(formData.endDate);
+  //     const tenMinutesFromNow = new Date(Date.now() + 10 * 60 * 1000);
+  //     if (eventEndDate <= tenMinutesFromNow)
+  //       throw new Error("Event must be at least 10 minutes in the future");
 
-      if (!formData.location.trim()) throw new Error("Location is required");
-      if (!formData.description.trim())
-        throw new Error("Description is required");
-      if (!formData.category.trim()) throw new Error("Category is required");
+  //     if (!formData.location.trim()) throw new Error("Location is required");
+  //     if (!formData.description.trim())
+  //       throw new Error("Description is required");
+  //     if (!formData.category.trim()) throw new Error("Category is required");
 
-      const ticketError = validateTicketTypes(ticketTypes);
-      if (ticketError) throw new Error(ticketError);
+  //     const ticketError = validateTicketTypes(ticketTypes);
+  //     if (ticketError) throw new Error(ticketError);
 
-      if (!imageFile && !imageUrl) {
-        throw new Error("Please provide an image URL or upload an image");
-      }
+  //     if (!imageFile && !imageUrl) {
+  //       throw new Error("Please provide an image URL or upload an image");
+  //     }
 
-      let _imageUrl = imageUrl;
+  //     let _imageUrl = imageUrl;
 
-      if (imageFile) {
-        const _formData = new FormData();
-        _formData.append("file", imageFile);
-        _formData.append(
-          "upload_preset",
-          import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET!
-        );
+  //     if (imageFile) {
+  //       const _formData = new FormData();
+  //       _formData.append("file", imageFile);
+  //       _formData.append(
+  //         "upload_preset",
+  //         import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET!
+  //       );
 
-        const response = await fetch(
-          `https://api.cloudinary.com/v1_1/${
-            import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
-          }/image/upload`,
-          {
-            method: "POST",
-            body: _formData,
-          }
-        );
+  //       const response = await fetch(
+  //         `https://api.cloudinary.com/v1_1/${
+  //           import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+  //         }/image/upload`,
+  //         {
+  //           method: "POST",
+  //           body: _formData,
+  //         }
+  //       );
 
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Upload failed");
+  //       const data = await response.json();
+  //       if (!response.ok) throw new Error(data.message || "Upload failed");
 
-        _imageUrl = data.secure_url;
-      }
+  //       _imageUrl = data.secure_url;
+  //     }
 
-      const eventData: Omit<
-        Event,
-        "id" | "createdAt" | "ticketsSold" | "soldOut"
-      > = {
-        ...formData,
-        image: _imageUrl!,
-        ticketTypes,
-      };
+  //     const eventData: Omit<
+  //       Event,
+  //       "id" | "createdAt" | "ticketsSold" | "soldOut"
+  //     > = {
+  //       ...formData,
+  //       image: _imageUrl!,
+  //       ticketTypes,
+  //     };
 
-      await createEvent(eventData);
-      navigate("/dashboard");
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An error occurred";
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //     await createEvent(eventData);
+  //     navigate("/dashboard");
+  //   } catch (err) {
+  //     const errorMessage =
+  //       err instanceof Error ? err.message : "An error occurred";
+  //     setError(errorMessage);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   if (!user) {
     return <div className="text-center py-10">Loading...</div>;
@@ -243,15 +250,34 @@ export default function EventCreationForm() {
               className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
             />
 
-            <FormInput<string>
-              type="datetime-local"
-              value={formData.date}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, date: e.target.value }))
-              }
-              className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
-              required
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormInput<string>
+                type="datetime-local"
+                value={formData.startDate}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    startDate: e.target.value,
+                  }))
+                }
+                withLabel={true}
+                label="When is the event starting:"
+                className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
+                required
+              />
+
+              <FormInput<string>
+                type="datetime-local"
+                value={formData.endDate}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, endDate: e.target.value }))
+                }
+                withLabel={true}
+                label="When is the event ending:"
+                className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
+                required
+              />
+            </div>
 
             <FormInput<string>
               type="text"

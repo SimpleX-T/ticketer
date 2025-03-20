@@ -20,7 +20,6 @@ import Skeleton from "../components/bookings/Skeleton";
 
 export default function BookingPage() {
   const params = useParams<{ eventId: string }>();
-  // const event = mockEvents.find((event: Event) => event.id === params.eventId);
   const { user } = useAuth();
 
   // const [step, setStep] = useState<number>(1);
@@ -116,13 +115,13 @@ export default function BookingPage() {
 
                 <div className="flex items-end md:items-start md:flex-col mt-4 gap-2">
                   <div className="flex items-center gap-3 bg-secondary-100 md:p-1 rounded-lg text-white md:pr-2">
-                    <CalendarDate date={event.date} />
+                    <CalendarDate date={event.startDate} />
                     <div className="hidden md:block">
                       <h3 className="text-sm font-semibold">
-                        {formatFullDate(event.date)}
+                        {formatFullDate(event.startDate)}
                       </h3>
                       <p className="text-xs">
-                        {formatTimeFromDateString(event.date)}
+                        {formatTimeFromDateString(event.startDate)}
                       </p>
                     </div>
                   </div>

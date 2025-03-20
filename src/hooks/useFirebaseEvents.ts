@@ -39,7 +39,6 @@ export const createEvent = async (
       id: eventRef.id,
       organizerId: currentUser.id,
       createdAt: new Date().toISOString(),
-      status: EventStatus.DRAFT,
       ticketsSold: 0,
       soldOut: false,
       totalCapacity,

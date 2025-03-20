@@ -63,7 +63,8 @@ export enum EventStatus {
 export interface Event {
   id: string;
   name: string;
-  date: string;
+  startDate: string;
+  endDate: string;
   location: string;
   description: string;
   image: string;

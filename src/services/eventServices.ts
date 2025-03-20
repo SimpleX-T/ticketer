@@ -43,3 +43,12 @@ export const createEvent = async (
 export const getEventDetails = async (EventId: string) => {
   console.log(EventId);
 };
+
+export const getAllEvents = async () => {
+  const { data: events, error } = await supabase.from("events").select("*");
+
+  if (error) throw error;
+
+  console.log(events);
+  return events;
+};

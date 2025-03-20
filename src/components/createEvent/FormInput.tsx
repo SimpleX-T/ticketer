@@ -10,6 +10,8 @@ interface FormInputProps<T> {
   disabled?: boolean;
   name?: string;
   list?: string;
+  withLabel?: boolean;
+  label?: string;
 }
 export default function FormInput<T>({
   value,
@@ -21,18 +23,30 @@ export default function FormInput<T>({
   list,
   name,
   disabled,
+  withLabel = false,
+  label,
 }: FormInputProps<T>) {
   return (
-    <input
-      type={type}
-      placeholder={placeholder}
-      value={value as string}
-      onChange={onChange}
-      className={className}
-      required={required}
-      name={name}
-      list={list}
-      disabled={disabled}
-    />
+    <div>
+      {withLabel && (
+        <label
+          htmlFor={name}
+          className="blocmediumk text-sm text-secondary mb-1"
+        >
+          {label}
+        </label>
+      )}
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={value as string}
+        onChange={onChange}
+        className={className}
+        required={required}
+        name={name}
+        list={list}
+        disabled={disabled}
+      />
+    </div>
   );
 }

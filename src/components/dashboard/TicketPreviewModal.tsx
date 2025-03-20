@@ -3,13 +3,21 @@ import { FaTimes } from "react-icons/fa";
 import { Event, Ticket, TicketType, User } from "../../types";
 import { BiCalendar } from "react-icons/bi";
 
-const TicketPreviewModal: React.FC<{
+type TicketPreviewModalProps = {
   ticketEvent: Event | null;
   ticketUser: User | null;
   ticketType: TicketType | null;
   ticket: Ticket;
   onclose: (state: boolean) => void;
-}> = ({ ticketEvent, ticketUser, ticketType, ticket, onclose }) => {
+};
+
+const TicketPreviewModal: React.FC<TicketPreviewModalProps> = ({
+  ticketEvent,
+  ticketUser,
+  ticketType,
+  ticket,
+  onclose,
+}) => {
   return (
     <div className="w-full flex items-center justify-center h-full relative">
       <div className="p-6 mb-8 w-full ticket max-w-[400px] mx-auto mt-20">
@@ -22,7 +30,8 @@ const TicketPreviewModal: React.FC<{
               📍 {ticketEvent?.location}
             </address>
             <p className="text-white text-xs">
-              <BiCalendar className="inline-block mr-2" /> {ticketEvent?.date}
+              <BiCalendar className="inline-block mr-2" />{" "}
+              {ticketEvent?.startDate}
             </p>
           </div>
 

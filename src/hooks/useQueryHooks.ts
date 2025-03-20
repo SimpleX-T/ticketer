@@ -2,11 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createEvent,
   getEventWithTickets,
-  publishEvent,
   updateEvent,
-  getPublishedEvents,
 } from "./useFirebaseEvents";
 import { Event, User } from "../types";
+import { getAllEvents } from "../services/eventServices";
 
 // Query keys
 export const queryKeys = {
@@ -15,10 +14,10 @@ export const queryKeys = {
 };
 
 // Hook for fetching all published events
-export const usePublishedEvents = () => {
+export const useGetEvents = () => {
   return useQuery({
     queryKey: [queryKeys.events],
-    queryFn: getPublishedEvents,
+    queryFn: getAllEvents,
   });
 };
 
@@ -46,28 +45,6 @@ export const useCreateEvent = () => {
     onSuccess: () => {
       // Invalidate relevant queries when a new event is created
       queryClient.invalidateQueries({ queryKey: [queryKeys.events] });
-    },
-  });
-};
-
-// Hook for publishing an event
-export const usePublishEvent = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({
-      eventId,
-      currentUser,
-    }: {
-      eventId: string;
-      currentUser: User;
-    }) => publishEvent(eventId, currentUser),
-    onSuccess: (_, variables) => {
-      // Invalidate relevant queries when an event is published
-      queryClient.invalidateQueries({ queryKey: [queryKeys.events] });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.event(variables.eventId),
-      });
     },
   });
 };
