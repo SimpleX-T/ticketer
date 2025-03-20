@@ -43,7 +43,7 @@ export default function Login() {
         <hr className="w-4/5 border-secondary mx-auto border-dotted mb-6" />
 
         <form
-          className="rounded-md border w-full p-2 py-4 mb-3 space-y-5"
+          className="rounded-md border w-full p-4 mb-3 space-y-5"
           style={{
             borderImage:
               "linear-gradient(var(--color-primary-100), var(--color-secondary))",
@@ -129,21 +129,20 @@ export default function Login() {
               "Login"
             )}
           </button>
+          <div className="px-6">
+            <p className="text-xs text-secondary text-center">
+              Don&apos;t have an account yet?{" "}
+              <Link
+                to="/signup"
+                className="font-semibold hover:underline"
+                replace
+              >
+                Create
+              </Link>{" "}
+              a new account.
+            </p>
+          </div>
         </form>
-
-        <div>
-          <p className="text-xs text-secondary text-center">
-            Don&apos;t have an account yet?{" "}
-            <Link
-              to="/signup"
-              className="font-semibold hover:underline"
-              replace
-            >
-              create
-            </Link>{" "}
-            a new account.
-          </p>
-        </div>
       </div>
     </section>
   );

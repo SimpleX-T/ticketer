@@ -5,7 +5,7 @@ import { formatDateString } from "../../utils/helpers";
 import { FaArrowRight, FaMapMarkerAlt } from "react-icons/fa";
 
 export const EventCard = ({ event }: { event: Event }) => {
-  const isPastEvent = new Date(event.endDate) < new Date();
+  const isPastEvent = new Date(event.endDate || event.startDate) < new Date();
   const category = categoryTags.find((cat) => cat.value === event.category) || {
     backgroundColor: "#6c757d",
     textColor: "#ffffff",
@@ -13,7 +13,7 @@ export const EventCard = ({ event }: { event: Event }) => {
 
   return (
     <Link
-      to={isPastEvent ? "#" : `/events/${event.id}`}
+      to={isPastEvent || event.soldOut ? "#" : `/events/${event.id}`}
       className="group flex w-full lg:w-1/2 flex-col md:flex-row bg-primary-300 text-secondary rounded-xl overflow-hidden shadow-md border border-secondary/10 transition-all duration-300 hover:shadow-lg relative"
       style={{ opacity: isPastEvent ? 0.5 : 1 }}
     >

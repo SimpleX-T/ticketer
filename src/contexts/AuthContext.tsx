@@ -5,12 +5,13 @@ import {
   useEffect,
   useState,
 } from "react";
-import { auth } from "../services/firebase";
 import { AuthArgs, User } from "../types";
-import { getCurrentUser, onAuthStateChanged } from "../hooks/useFirebaseAuth";
-import { login, logout, signup } from "../services/userServices";
+import { getUserData, login, logout, signup } from "../services/userServices";
 
 type AuthErrorType = string | null;
+
+const USER_KEY = "curUser";
+const AUTHENTICATION_KEY = "isAuthenticated";
 
 interface AuthContextType {
   user: User | null;
@@ -50,40 +51,45 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const clearError = () => setError(null);
 
-  // Listen for Firebase auth state changes
+  const setLocalstorageData = (data: { title: string; value: string }[]) => {
+    data.forEach((item) => localStorage.setItem(item.title, item.value));
+  };
+
   useEffect(() => {
-    clearError();
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const checkAuthState = async () => {
       setIsLoading(true);
-
       try {
-        if (firebaseUser) {
-          const userData = await getCurrentUser(firebaseUser);
+        const curUser = localStorage.getItem("curUser");
+        const authState = localStorage.getItem("isAuthenticated");
 
-          if (userData) {
-            setUser(userData);
-            setIsAuthenticated(true);
-          } else {
-            // User exists in Firebase Auth but not in Firestore
-            await logout();
-            setUser(null);
-            setIsAuthenticated(false);
-          }
+        if (!curUser || !authState || authState !== "true") {
+          await logout();
+          setUser(null);
+          setIsAuthenticated(false);
+          return;
+        }
+
+        const user = await getUserData(curUser);
+
+        if (user) {
+          setUser(user);
+          setIsAuthenticated(true);
         } else {
+          console.warn("User not found, logging out...");
+          await logout();
           setUser(null);
           setIsAuthenticated(false);
         }
-      } catch (err) {
-        console.error("Auth state change error:", err);
+      } catch (error) {
+        console.error("Error checking auth state:", error);
         setUser(null);
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
       }
-    });
+    };
 
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
+    checkAuthState();
   }, []);
 
   const handleLogin = async (email: string, password: string) => {
@@ -104,6 +110,11 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
       const user = await login(email, password);
       setUser(user);
       setIsAuthenticated(true);
+
+      setLocalstorageData([
+        { title: USER_KEY, value: JSON.stringify(user.id) },
+        { title: AUTHENTICATION_KEY, value: JSON.stringify(true) },
+      ]);
     } catch (err) {
       let errorMessage = "Login failed";
 
@@ -154,8 +165,12 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
       const newUser = await signup(userData);
       console.log(newUser);
-      // setUser(newUser as User);
-      // setIsAuthenticated(true);
+      setUser(newUser);
+      setIsAuthenticated(true);
+      setLocalstorageData([
+        { title: USER_KEY, value: newUser.id },
+        { title: AUTHENTICATION_KEY, value: JSON.stringify(true) },
+      ]);
     } catch (err) {
       let errorMessage = "Signup failed";
 
@@ -184,6 +199,9 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
       await logout();
       setUser(null);
       setIsAuthenticated(false);
+
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(AUTHENTICATION_KEY);
     } catch (err) {
       console.error("Logout error:", err);
     } finally {

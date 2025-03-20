@@ -1,4 +1,4 @@
-import { AuthArgs } from "../types";
+import { AuthArgs, User } from "../types";
 import { supabase } from "./supabaseClient";
 
 export const login = async (email: string, password: string) => {
@@ -54,14 +54,14 @@ const createNewUser = async (userData: AuthArgs, userId: string) => {
   return newUser;
 };
 
-export const getUserData = async (userId: string) => {
+export const getUserData = async (userId: string): Promise<User> => {
   if (!userId) throw new Error("User ID is required");
   const { data: userData, error } = await supabase
     .from("users")
     .select("*")
     .eq("id", userId)
     .single();
-  if (error) return console.warn(error);
+  if (error) throw console.warn(error);
 
   return userData;
 };
@@ -69,4 +69,26 @@ export const getUserData = async (userId: string) => {
 export const logout = async () => {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
+};
+
+export const updateUser = async (
+  userId: string,
+  data: { field: string; value: unknown }[]
+) => {
+  try {
+    const updates = data.map(async (item) => {
+      const { error } = await supabase
+        .from("users")
+        .update({ [item.field]: item.value })
+        .eq("id", userId);
+
+      if (error) throw error;
+    });
+
+    await Promise.all(updates);
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return { success: false, error };
+  }
 };

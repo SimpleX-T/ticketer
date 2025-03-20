@@ -28,7 +28,9 @@ export const useEventForm = (
     totalCapacity: 0,
   });
 
-  const [ticketTypes, setTicketTypes] = useState<TicketType[]>([]);
+  const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
+    { ...INITIAL_TICKET_TYPE },
+  ]);
   const [imageFile, setImageFile] = useState<File | undefined>(undefined);
   const [imageUrl, setImageUrl] = useState<string>("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);

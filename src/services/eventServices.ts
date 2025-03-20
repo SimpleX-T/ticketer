@@ -5,8 +5,6 @@ import { Event } from "../types";
 export const createEvent = async (
   event: Omit<Event, "id" | "createdAt" | "ticketsSold" | "soldOut">
 ) => {
-  console.log(event);
-
   const { ticketTypes, ...eventData } = event;
 
   const { data, error: eventError } = await supabase
@@ -49,6 +47,5 @@ export const getAllEvents = async () => {
 
   if (error) throw error;
 
-  console.log(events);
   return events;
 };

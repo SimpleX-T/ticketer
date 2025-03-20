@@ -13,12 +13,13 @@ export default function Events() {
   const { data: events = [], isLoading, error } = useGetEvents();
 
   // Filter events based on search term and category
-  const filteredEvents = events.filter((event) => {
+  const filteredEvents = events.slice(0, 3).filter((event) => {
     const matchesSearch =
       event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
-      categoryFilter === "all" || event.category === categoryFilter;
+      categoryFilter === "all" ||
+      event.category.toLowerCase() === categoryFilter.toLowerCase();
     return matchesSearch && matchesCategory;
   });
 
@@ -29,7 +30,7 @@ export default function Events() {
   // Categories for filtering
   const categories = [
     { id: "all", name: "All Events" },
-    { id: "concert", name: "Concerts" },
+    { id: "entertainment", name: "Entertainment" },
     { id: "conference", name: "Conferences" },
     { id: "workshop", name: "Workshops" },
     { id: "sport", name: "Sports" },
