@@ -1,40 +1,41 @@
 import { motion } from "motion/react";
 import { useState } from "react";
-import { usePublishedEvents } from "../../../hooks/useQueryHooks";
-import { mockEvents } from "../../../utils/constants";
+import { useGetEvents } from "../../../hooks/useQueryHooks";
 import { Link } from "react-router-dom";
 import { FaArrowRight, FaMarker } from "react-icons/fa6";
 import { FiSearch } from "react-icons/fi";
+import { Event } from "../../../types";
 
 export default function Events() {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [categoryFilter, setCategoryFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
-    // Fetch real events from Firestore using React Query
-    const { data: events = [], isLoading, error } = usePublishedEvents();
+  // Fetch real events from Firestore using React Query
+  const { data: events = [], isLoading, error } = useGetEvents();
 
-    // Filter events based on search term and category
-    const filteredEvents = events.filter((event) => {
-      const matchesSearch =
-        event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory =
-        categoryFilter === "all" || event.category === categoryFilter;
-      return matchesSearch && matchesCategory;
-    });
+  // Filter events based on search term and category
+  const filteredEvents = events.slice(0, 3).filter((event: Event) => {
+    const matchesSearch =
+      event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      categoryFilter === "all" ||
+      event.category.toLowerCase() === categoryFilter.toLowerCase();
+    return matchesSearch && matchesCategory;
+  });
 
-    // Fallback to mock events if there's an error or no events are available
-    const displayEvents =
-      filteredEvents.length > 0 ? filteredEvents : error ? mockEvents : [];
+  // Fallback to mock events if there's an error or no events are available
+  const displayEvents =
+    filteredEvents.length > 0 ? filteredEvents : error ? [] : [];
 
-    // Categories for filtering
-    const categories = [
-      { id: "all", name: "All Events" },
-      { id: "concert", name: "Concerts" },
-      { id: "conference", name: "Conferences" },
-      { id: "workshop", name: "Workshops" },
-      { id: "sport", name: "Sports" },
-    ];
+  // Categories for filtering
+  const categories = [
+    { id: "all", name: "All Events" },
+    { id: "entertainment", name: "Entertainment" },
+    { id: "conference", name: "Conferences" },
+    { id: "workshop", name: "Workshops" },
+    { id: "sport", name: "Sports" },
+  ];
 
   return (
     <section
@@ -87,7 +88,7 @@ export default function Events() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:px-16">
           {displayEvents.length > 0 ? (
-            displayEvents.map((event) => (
+            displayEvents.map((event: Event) => (
               <motion.div
                 key={event.id}
                 className="relative group h-full"
@@ -97,16 +98,16 @@ export default function Events() {
               >
                 <Link
                   to={
-                    event.date < new Date().toISOString()
+                    event.endDate < new Date().toISOString()
                       ? "#"
                       : `/events/${event.id}`
                   }
                   className="h-full flex flex-col relative bg-primary-300 text-secondary rounded-2xl overflow-hidden shadow-xl border border-secondary/10 hover:border-secondary/30 transition-all duration-300 hover:shadow-2xl"
                   style={{
-                    opacity: event.date < new Date().toISOString() ? 0.5 : 1,
+                    opacity: event.endDate < new Date().toISOString() ? 0.5 : 1,
                   }}
                 >
-                  {event.date < new Date().toISOString() && (
+                  {event.endDate < new Date().toISOString() && (
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-10">
                       <span className="text-2xl font-bold text-secondary">
                         Event Over
@@ -132,13 +133,12 @@ export default function Events() {
                     {/* Date Badge */}
                     <div className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm text-secondary rounded-lg overflow-hidden shadow-lg">
                       <div className="bg-secondary text-white text-xs font-bold py-1 px-3 text-center">
-                        {new Date(event.date || event.createdAt).toLocaleString(
-                          "default",
-                          { month: "short" }
-                        )}
+                        {new Date(
+                          event.startDate || event.createdAt
+                        ).toLocaleString("default", { month: "short" })}
                       </div>
                       <div className="py-1 px-3 text-center font-bold">
-                        {new Date(event.date || event.createdAt).getDate()}
+                        {new Date(event.startDate || event.createdAt).getDate()}
                       </div>
                     </div>
 
@@ -167,9 +167,6 @@ export default function Events() {
 
                     <div className="mt-auto pt-4 border-t border-secondary/10 flex justify-between items-center">
                       <div className="relative flex items-center h-10 overflow-hidden">
-                        {/* <span className="flex items-center justify-center bg-secondary/10 hover:bg-secondary/20 text-secondary px-3 border-secondary border h-full transition-colors duration-300">
-                            <FaArrowRight />
-                          </span> */}
                         <span className="text-md bg-secondary/10 hover:bg-secondary/20 text-secondary px-3 py-1 transition-colors duration-300 border border-r-transparent h-full flex items-center">
                           View Details
                         </span>
@@ -178,30 +175,6 @@ export default function Events() {
                         </span>
                       </div>
                     </div>
-
-                    {/* <div className="space-y-3">
-                    {Object.entries(event.prices).map(([type, price]) => (
-                      <button
-                        key={type}
-                        onClick={() =>
-                          handleBuyTicket(
-                            event,
-                            type as "REGULAR" | "VIP" | "VVIP"
-                          )
-                        }
-                        disabled={event.soldOut}
-                        className={`w-full flex justify-between items-center p-3 rounded-lg
-                            ${
-                              event.soldOut
-                                ? "bg-gray-100 cursor-not-allowed"
-                                : "bg-blue-50 hover:bg-blue-100"
-                            }`}
-                      >
-                        <span>{type}</span>
-                        <span className="font-semibold">${price}</span>
-                      </button>
-                    ))}
-                  </div> */}
                   </div>
                 </Link>
               </motion.div>

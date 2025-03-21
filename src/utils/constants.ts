@@ -1,335 +1,63 @@
-import { Event, User } from "../types";
-import { generateRandomId } from "./helpers";
+import { FaCalendarAlt } from "react-icons/fa";
+import { TicketType } from "../types";
 
-export const mockEvents: Event[] = [
+export const MAX_FILE_SIZE = 5 * 1024 * 1024;
+export const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/gif"];
+export const navItems = [
+  { path: "/events", label: "Explore Events", icon: FaCalendarAlt },
+  { path: "/create-event", label: "Host Event", icon: FaCalendarAlt },
+  { path: "/about", label: "About Us", icon: null },
+];
+
+export const categoryTags = [
   {
-    id: generateRandomId(),
-    name: "Summer Music Festival",
-    date: "2024-07-15",
-    location: "Central Park, New York",
-    description:
-      "Annual summer music festival featuring top artists from around the world.",
-    image:
-      "https://i.pinimg.com/736x/b3/dc/9c/b3dc9c80a7f08f69383415a79317ac4b.jpg",
-    ticketsType: [
-      {
-        id: generateRandomId(),
-        name: "Regular",
-        price: "50",
-        type: "REGULAR",
-        available: 1000,
-        total: 1000,
-      },
-      {
-        id: generateRandomId(),
-        name: "VIP",
-        price: "150",
-        type: "VIP",
-        available: 500,
-        total: 500,
-      },
-      {
-        id: generateRandomId(),
-        name: "VVIP",
-        price: "300",
-        type: "VVIP",
-        available: 200,
-        total: 200,
-      },
-    ],
-    soldOut: false,
+    label: "Music",
+    value: "music",
+    backgroundColor: "#1E90FF", // Dodger Blue
+    textColor: "#FFFFFF", // White
   },
   {
-    id: generateRandomId(),
-    name: "Tech Conference 2024",
-    date: "2024-08-20",
-    location: "Convention Center, San Francisco",
-    description:
-      "The biggest tech conference of the year, featuring keynote speakers and workshops.",
-    image:
-      "https://i.pinimg.com/736x/cd/cf/09/cdcf0988ae7baec4e52d6214a5198d4b.jpg",
-    ticketsType: [
-      {
-        id: generateRandomId(),
-        name: "Regular",
-        price: "100",
-        type: "REGULAR",
-        available: 0,
-        total: 1000,
-      },
-      {
-        id: generateRandomId(),
-        name: "VIP",
-        price: "250",
-        type: "VIP",
-        available: 0,
-        total: 500,
-      },
-      {
-        id: generateRandomId(),
-        name: "VVIP",
-        price: "500",
-        type: "VVIP",
-        available: 0,
-        total: 200,
-      },
-    ],
-    soldOut: true,
+    label: "Sports",
+    value: "sports",
+    backgroundColor: "#28A745", // Green
+    textColor: "#FFFFFF", // White
   },
   {
-    id: generateRandomId(),
-    name: "Food & Wine Expo",
-    date: "2024-09-10",
-    location: "Metro Toronto Convention Centre",
-    description:
-      "A culinary extravaganza showcasing the best food and wine from around the globe.",
-    image:
-      "https://i.pinimg.com/736x/cd/cf/09/cdcf0988ae7baec4e52d6214a5198d4b.jpg",
-    ticketsType: [
-      {
-        id: generateRandomId(),
-        name: "Regular",
-        price: "40",
-        type: "REGULAR",
-        available: 800,
-        total: 800,
-      },
-      {
-        id: generateRandomId(),
-        name: "VIP",
-        price: "120",
-        type: "VIP",
-        available: 300,
-        total: 300,
-      },
-      {
-        id: generateRandomId(),
-        name: "VVIP",
-        price: "250",
-        type: "VVIP",
-        available: 100,
-        total: 100,
-      },
-    ],
-    soldOut: false,
+    label: "Arts",
+    value: "arts",
+    backgroundColor: "#FF5733", // Vibrant Red-Orange
+    textColor: "#FFFFFF", // White
   },
   {
-    id: generateRandomId(),
-    name: "Comic Con 2025",
-    date: "2025-10-03",
-    location: "San Diego Convention Center",
-    description:
-      "The ultimate pop culture event featuring celebrities, panels, and exclusive merchandise.",
-    image:
-      "https://i.pinimg.com/736x/36/73/d4/3673d463776873e57195d2dfbac48d58.jpg",
-    ticketsType: [
-      {
-        id: generateRandomId(),
-        name: "Regular",
-        price: "75",
-        type: "REGULAR",
-        available: 500,
-        total: 500,
-      },
-      {
-        id: generateRandomId(),
-        name: "VIP",
-        price: "200",
-        type: "VIP",
-        available: 250,
-        total: 250,
-      },
-      {
-        id: generateRandomId(),
-        name: "VVIP",
-        price: "400",
-        type: "VVIP",
-        available: 100,
-        total: 100,
-      },
-    ],
-    soldOut: false,
+    label: "Birthday",
+    value: "birthday",
+    backgroundColor: "#FFC107", // Bright Yellow
+    textColor: "#000000", // Black
   },
   {
-    id: generateRandomId(),
-    name: "Winter Wonderland",
-    date: "2024-12-20",
-    location: "Hyde Park, London",
-    description:
-      "A magical winter festival with ice skating, festive markets, and live entertainment.",
-    image:
-      "https://i.pinimg.com/736x/5b/25/3b/5b253bc89176bc94f14a02af61182176.jpg",
-    ticketsType: [
-      {
-        id: generateRandomId(),
-        name: "Regular",
-        price: "30",
-        type: "REGULAR",
-        available: 700,
-        total: 700,
-      },
-      {
-        id: generateRandomId(),
-        name: "VIP",
-        price: "80",
-        type: "VIP",
-        available: 350,
-        total: 350,
-      },
-      {
-        id: generateRandomId(),
-        name: "VVIP",
-        price: "150",
-        type: "VVIP",
-        available: 150,
-        total: 150,
-      },
-    ],
-    soldOut: false,
-  },
-  {
-    id: generateRandomId(),
-    name: "E-Sports Championship",
-    date: "2024-11-15",
-    location: "Staples Center, Los Angeles",
-    description:
-      "Watch the world's best gamers compete in this high-stakes e-sports tournament.",
-    image:
-      "https://i.pinimg.com/736x/1d/dc/ad/1ddcad35dd9f6df59114e9d9832dbd0c.jpg",
-    ticketsType: [
-      {
-        id: generateRandomId(),
-        name: "Regular",
-        price: "60",
-        type: "REGULAR",
-        available: 900,
-        total: 900,
-      },
-      {
-        id: generateRandomId(),
-        name: "VIP",
-        price: "180",
-        type: "VIP",
-        available: 400,
-        total: 400,
-      },
-      {
-        id: generateRandomId(),
-        name: "VVIP",
-        price: "350",
-        type: "VVIP",
-        available: 200,
-        total: 200,
-      },
-    ],
-    soldOut: false,
-  },
-  {
-    id: generateRandomId(),
-    name: "Jazz Nights",
-    date: "2024-06-25",
-    location: "Blue Note, Tokyo",
-    description:
-      "An intimate evening of smooth jazz performances by legendary artists.",
-    image: "https://source.unsplash.com/random/800x600/?jazz,music",
-    ticketsType: [
-      {
-        id: generateRandomId(),
-        name: "Regular",
-        price: "70",
-        type: "REGULAR",
-        available: 300,
-        total: 300,
-      },
-      {
-        id: generateRandomId(),
-        name: "VIP",
-        price: "200",
-        type: "VIP",
-        available: 150,
-        total: 150,
-      },
-      {
-        id: generateRandomId(),
-        name: "VVIP",
-        price: "400",
-        type: "VVIP",
-        available: 50,
-        total: 50,
-      },
-    ],
-    soldOut: false,
-  },
-  {
-    id: generateRandomId(),
-    name: "Broadway Musical Showcase",
-    date: "2024-10-05",
-    location: "Broadway Theatre, New York",
-    description:
-      "Experience the magic of Broadway with performances from top musicals.",
-    image: "https://source.unsplash.com/random/800x600/?broadway,musical",
-    ticketsType: [
-      {
-        id: generateRandomId(),
-        name: "Regular",
-        price: "80",
-        type: "REGULAR",
-        available: 400,
-        total: 400,
-      },
-      {
-        id: generateRandomId(),
-        name: "VIP",
-        price: "220",
-        type: "VIP",
-        available: 200,
-        total: 200,
-      },
-      {
-        id: generateRandomId(),
-        name: "VVIP",
-        price: "450",
-        type: "VVIP",
-        available: 100,
-        total: 100,
-      },
-    ],
-    soldOut: false,
-  },
-  {
-    id: generateRandomId(),
-    name: "International Film Festival",
-    date: "2024-09-30",
-    location: "Cinema Complex, Berlin",
-    description:
-      "A week-long celebration of international cinema featuring premieres and director talks.",
-    image: "https://source.unsplash.com/random/800x600/?cinema,film",
-    ticketsType: [
-      {
-        id: generateRandomId(),
-        name: "Regular",
-        price: "45",
-        type: "REGULAR",
-        available: 600,
-        total: 600,
-      },
-      {
-        id: generateRandomId(),
-        name: "VIP",
-        price: "120",
-        type: "VIP",
-        available: 300,
-        total: 300,
-      },
-      {
-        id: generateRandomId(),
-        name: "VVIP",
-        price: "250",
-        type: "VVIP",
-        available: 100,
-        total: 100,
-      },
-    ],
-    soldOut: false,
+    label: "Others",
+    value: "others",
+    backgroundColor: "#6F42C1", // Purple
+    textColor: "#FFFFFF", // White
   },
 ];
+
+export const INITIAL_TICKET_TYPE: TicketType = {
+  id: "",
+  name: "",
+  price: 0,
+  type: "regular",
+  available: 0,
+  total: 0,
+  description: "",
+  benefits: [],
+};
+
+export const generateTicketCode = () => {
+  const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let result = "";
+  for (let i = 0; i < 8; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};

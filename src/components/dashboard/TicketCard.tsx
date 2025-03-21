@@ -1,15 +1,13 @@
-/*
-  When the organizer creates an event, they create a document that contains other event data plus a subcollection of ticketTypes.
-  When a user books a ticket for an event, they create a ticket document with references to the event, the ticket type, and user that booked the ticket
- */
-
 import { useEffect, useRef, useState } from "react";
 import { FaEllipsisVertical } from "react-icons/fa6";
-import { Event, Ticket, TicketType, User } from "../../types";
+import { Ticket, User } from "../../types";
 import { DeleteModal } from "./DeleteModal";
-import { collection, doc, getDoc } from "firebase/firestore";
-import { db } from "../../services/firebase";
 import TicketPreviewModal from "./TicketPreviewModal";
+import { useQuery } from "@tanstack/react-query";
+import { getEventDetails } from "../../services/eventServices";
+import { useAuth } from "../../contexts/AuthContext";
+import { supabase } from "../../services/supabaseClient";
+import { getTicketTypeById } from "../../services/ticketServices";
 
 export const TicketCard = ({
   ticket,
@@ -28,50 +26,49 @@ export const TicketCard = ({
   const [showOptions, setShowOptions] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const optionRef = useRef<HTMLDivElement | null>(null);
-  const [ticketEvent, setTicketEvent] = useState<Event | null>(null);
+  const { user } = useAuth();
+
   const [ticketUser, setTicketUser] = useState<User | null>(null);
-  const [ticketType, setTicketType] = useState<TicketType | null>(null);
+
+  const {
+    data: ticketEvent,
+    error: eventError,
+    isLoading: isFetchingEvent,
+  } = useQuery({
+    queryFn: () => getEventDetails(ticket.eventId),
+    queryKey: ["event", ticket.eventId],
+    enabled: !!ticket.eventId,
+  });
+
+  const {
+    data: ticketType,
+    error: ticketTypeError,
+    isLoading: isGettingTicketType,
+  } = useQuery({
+    queryFn: () => getTicketTypeById(ticket.ticketTypeId),
+    queryKey: ["ticketType", ticket.ticketTypeId],
+    enabled: !!ticket.ticketTypeId,
+  });
 
   useEffect(() => {
-    const getTicketEvent = async () => {
-      try {
-        const event = await getDoc(doc(db, "events", ticket.eventId));
-        if (!event.exists()) return;
-        setTicketEvent(event.data() as Event);
-      } catch (error) {
-        console.log(error);
+    const setUser = async () => {
+      if (user?.id && user.id === ticket.userId) {
+        setTicketUser(user);
+      } else {
+        const { data, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", ticket.userId)
+          .single();
+
+        if (error) throw error;
+
+        setTicketUser(data);
       }
     };
 
-    const getTicketUser = async () => {
-      try {
-        const user = await getDoc(doc(db, "users", ticket.userId));
-        if (!user.exists()) return;
-        setTicketUser(user.data() as User);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    const getTicketType = async () => {
-      try {
-        const type = await getDoc(
-          doc(
-            collection(doc(db, "events", ticket.eventId), "ticketTypes"),
-            ticket.ticketTypeId
-          )
-        );
-        if (!type.exists()) return;
-        setTicketType(type.data() as TicketType);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    getTicketUser();
-    getTicketEvent();
-    getTicketType();
-  }, [ticket.eventId, ticket.userId, ticket.ticketTypeId]);
+    setUser();
+  }, [ticket.userId, user]);
 
   const handleShowOption = () => {
     setShowOptions(true);
@@ -99,6 +96,9 @@ export const TicketCard = ({
     setShowDeleteModal(true);
   };
 
+  if (eventError) return <div>{eventError.message}</div>;
+  if (ticketTypeError) return <div>{ticketTypeError.message}</div>;
+
   return (
     <div>
       <div
@@ -106,7 +106,9 @@ export const TicketCard = ({
         className="bg-primary relative flex rounded-lg -hidden h-36 shadow-md mt-4"
       >
         <div className="aspect-square min-h-full overflow-hidden rounded-lg">
-          {ticketEvent ? (
+          {isFetchingEvent ? (
+            <div className="w-full h-full bg-secondary/60 animate-pulse" />
+          ) : ticketEvent?.image ? (
             <img
               src={ticketEvent.image}
               alt={ticketEvent.name}
@@ -118,15 +120,13 @@ export const TicketCard = ({
         </div>
 
         <div className="p-4 pr-8">
-          <h3 className="text-sm md:text-lg mb-2 font-semibold text-secondary">
-            {ticketEvent?.name || "Event Name"}
-          </h3>
-          {/* <p className="text-secondary text-xs md:text-sm mb-1">
-          <strong>Tickets for:</strong> {ticket.}
-        </p> */}
-          {/* <p className="text-secondary text-xs md:text-sm mb-1">
-          <strong>Type:</strong> {ticket.typ?.name}
-        </p> */}
+          {isFetchingEvent ? (
+            <div className="w-36 rounded-sm h-4 bg-secondary/60 animate-pulse" />
+          ) : (
+            <h3 className="text-sm md:text-lg mb-2 font-semibold text-secondary">
+              {ticketEvent?.name}
+            </h3>
+          )}
         </div>
 
         {/* Option button */}
@@ -171,13 +171,17 @@ export const TicketCard = ({
 
       {openModal && (
         <div className="fixed w-full min-h-screen inset-0 bg-primary/20 backdrop-blur-md flex items-center justify-center">
-          <TicketPreviewModal
-            ticketEvent={ticketEvent}
-            ticketUser={ticketUser}
-            ticketType={ticketType}
-            ticket={ticket}
-            onclose={setOpenModal}
-          />
+          {isGettingTicketType ? (
+            <div className="w-full h-full bg-secondary/60 animate-pulse" />
+          ) : (
+            <TicketPreviewModal
+              ticketEvent={ticketEvent}
+              ticketUser={ticketUser}
+              ticketType={ticketType}
+              ticket={ticket}
+              onclose={setOpenModal}
+            />
+          )}
         </div>
       )}
     </div>
