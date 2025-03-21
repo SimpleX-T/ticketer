@@ -34,7 +34,7 @@ export const Input = ({
         type={type}
         id={id}
         name={name}
-        className={`mt-1 block w-full rounded-md bg-primary-300 border-primary-100 text-white ${className} outline-none p-2 border border-secondary-200`}
+        className={`mt-1 block w-full rounded-md bg-primary-300 border-primary-100 text-white ${className} outline-none p-2 border border-secondary-200 text-sm`}
         required={required}
         placeholder={placeholder}
       />

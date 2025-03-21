@@ -26,7 +26,6 @@ export interface Ticket {
   eventId: string;
   userId: string;
   purchaseDate: string;
-  price: number;
   ticketCode: string;
   isTransferred: boolean;
   transferredTo?: string;

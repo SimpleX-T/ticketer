@@ -4,6 +4,7 @@ import { useGetEvents } from "../../../hooks/useQueryHooks";
 import { Link } from "react-router-dom";
 import { FaArrowRight, FaMarker } from "react-icons/fa6";
 import { FiSearch } from "react-icons/fi";
+import { Event } from "../../../types";
 
 export default function Events() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,7 +14,7 @@ export default function Events() {
   const { data: events = [], isLoading, error } = useGetEvents();
 
   // Filter events based on search term and category
-  const filteredEvents = events.slice(0, 3).filter((event) => {
+  const filteredEvents = events.slice(0, 3).filter((event: Event) => {
     const matchesSearch =
       event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -87,7 +88,7 @@ export default function Events() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:px-16">
           {displayEvents.length > 0 ? (
-            displayEvents.map((event) => (
+            displayEvents.map((event: Event) => (
               <motion.div
                 key={event.id}
                 className="relative group h-full"
@@ -97,16 +98,16 @@ export default function Events() {
               >
                 <Link
                   to={
-                    event.date < new Date().toISOString()
+                    event.endDate < new Date().toISOString()
                       ? "#"
                       : `/events/${event.id}`
                   }
                   className="h-full flex flex-col relative bg-primary-300 text-secondary rounded-2xl overflow-hidden shadow-xl border border-secondary/10 hover:border-secondary/30 transition-all duration-300 hover:shadow-2xl"
                   style={{
-                    opacity: event.date < new Date().toISOString() ? 0.5 : 1,
+                    opacity: event.endDate < new Date().toISOString() ? 0.5 : 1,
                   }}
                 >
-                  {event.date < new Date().toISOString() && (
+                  {event.endDate < new Date().toISOString() && (
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-10">
                       <span className="text-2xl font-bold text-secondary">
                         Event Over
@@ -132,13 +133,12 @@ export default function Events() {
                     {/* Date Badge */}
                     <div className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm text-secondary rounded-lg overflow-hidden shadow-lg">
                       <div className="bg-secondary text-white text-xs font-bold py-1 px-3 text-center">
-                        {new Date(event.date || event.createdAt).toLocaleString(
-                          "default",
-                          { month: "short" }
-                        )}
+                        {new Date(
+                          event.startDate || event.createdAt
+                        ).toLocaleString("default", { month: "short" })}
                       </div>
                       <div className="py-1 px-3 text-center font-bold">
-                        {new Date(event.date || event.createdAt).getDate()}
+                        {new Date(event.startDate || event.createdAt).getDate()}
                       </div>
                     </div>
 

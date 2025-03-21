@@ -52,3 +52,12 @@ export const INITIAL_TICKET_TYPE: TicketType = {
   description: "",
   benefits: [],
 };
+
+export const generateTicketCode = () => {
+  const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let result = "";
+  for (let i = 0; i < 8; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};

@@ -30,7 +30,7 @@ export const Select = ({
         id={id}
         value={value}
         name={name}
-        className={`mt-1 block w-full rounded-md bg-primary-300 border-primary-100 text-white p-2 ${className}`}
+        className={`mt-1 block w-full rounded-md bg-primary-300 border-primary-100 text-white p-2 ${className} capitalize text-sm`}
         required={required}
         onChange={onChange}
       >
@@ -38,7 +38,7 @@ export const Select = ({
           Select an option
         </option>
         {options.map((option) => (
-          <option key={option} value={option}>
+          <option key={option} value={option} className="capitalize text-sm">
             {option}
           </option>
         ))}

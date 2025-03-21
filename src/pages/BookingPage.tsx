@@ -1,42 +1,36 @@
-import { useEffect, useState } from "react";
-// import { TicketSelection } from "../components/bookings/TicketSelection";
+import { FormEvent, useEffect, useState } from "react";
 import { Event, Ticket, TicketType, User } from "../types";
-// import { GeneratedTicket } from "../components/bookings/GeneratedTicket";
-// import { AttendeeForm } from "../components/bookings/AttendeeForm";
 import { useParams } from "react-router-dom";
-// import { mockEvents } from "../utils/constants";
 import { useAuth } from "../contexts/AuthContext";
-// import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../services/supabaseClient";
 import { formatFullDate, formatTimeFromDateString } from "../utils/helpers";
 import { FaMap, FaTag } from "react-icons/fa6";
-import { categoryTags } from "../utils/constants";
-// import { EventCard } from "../components/ui/EventCard";
+import { categoryTags, generateTicketCode } from "../utils/constants";
 import { Input } from "../components/ui/input";
 import { Select } from "../components/ui/select";
 import { CalendarDate } from "../components/ui/CalendarDate";
 import { TicketDetails } from "../components/bookings/TicketDetails";
 import Skeleton from "../components/bookings/Skeleton";
+import { bookTicket } from "../services/ticketServices";
 
 export default function BookingPage() {
   const params = useParams<{ eventId: string }>();
   const { user } = useAuth();
 
-  // const [step, setStep] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [event, setEvent] = useState<Event | null>(null);
+  const [organizer, setOrganizer] = useState<User | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<TicketType | null>(null);
   const [ticketData, setTicketData] = useState<Omit<Ticket, "id">>({
     ticketTypeId: "",
-    eventId: "",
+    eventId: event?.id || "",
     userId: user?.id || "",
-    purchaseDate: "",
-    price: 0,
-    ticketCode: "",
+    purchaseDate: new Date().toISOString(),
+    ticketCode: generateTicketCode(),
     isTransferred: false,
     transferredTo: "",
     specialRequests: "",
   });
-  const [event, setEvent] = useState<Event | null>(null);
-  const [organizer, setOrganizer] = useState<User | null>(null);
-  const [selectedTicket, setSelectedTicket] = useState<TicketType | null>(null);
 
   useEffect(() => {
     const getEventDetails = async () => {
@@ -91,6 +85,30 @@ export default function BookingPage() {
 
     handleGetTicketTypeDetails();
   }, [ticketData.ticketTypeId]);
+
+  console.log(event?.id);
+  const handleBookTicket = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    console.log(event?.id, user?.id);
+    if (!event?.id || !user?.id) return console.log("no ids");
+    try {
+      setIsLoading(true);
+
+      const { data, error } = await bookTicket(
+        { ...ticketData, eventId: event.id },
+        user?.id || ""
+      );
+
+      if (error) throw error;
+
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="select-none min-h-screen relative bg-primary overflow-hidden w-full">
@@ -150,7 +168,7 @@ export default function BookingPage() {
                       <span className="text-xs">{event.category}</span>
                     </div>
 
-                    {event.totalCapacity && (
+                    {/* {event.totalCapacity && (
                       <div className="md:flex items-center gap-1 p-1 bg-secondary-200 rounded-md hidden">
                         <span className="text-secondary text-sm">
                           {event.totalCapacity - event.ticketsSold}
@@ -159,7 +177,7 @@ export default function BookingPage() {
                           slots remaining
                         </span>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 </div>
 
@@ -180,7 +198,7 @@ export default function BookingPage() {
           </div>
 
           <div className="w-full md:w-1/2 pt-4 md:pt-0 md:pl-6 border-t md:border-t-0 md:border-l border-primary-100/40">
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleBookTicket}>
               <Input
                 id="name"
                 name="name"
@@ -225,13 +243,27 @@ export default function BookingPage() {
                 name="ticketType"
               />
 
+              <textarea
+                name="special-request"
+                id="special-request"
+                value={ticketData.specialRequests}
+                onChange={(e) =>
+                  setTicketData((prev) => ({
+                    ...prev,
+                    specialRequests: e.target.value,
+                  }))
+                }
+                className="mt-1 block w-full rounded-md bg-primary-300 border outline-none p-2 text-white border-secondary-200 text-sm"
+              ></textarea>
+
               {selectedTicket && <TicketDetails ticket={selectedTicket} />}
 
               <button
                 type="submit"
                 className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-secondary hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-500 cursor-pointer hover:bg-secondary-100 transition-colors duration-200"
+                disabled={isLoading}
               >
-                Register
+                {isLoading ? "booking ticket" : "Register"}
               </button>
             </form>
           </div>
