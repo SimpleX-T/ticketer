@@ -4,9 +4,9 @@ import { Event, Ticket, TicketType, User } from "../../types";
 import { BiCalendar } from "react-icons/bi";
 
 type TicketPreviewModalProps = {
-  ticketEvent: Event | null;
+  ticketEvent: Event | undefined;
   ticketUser: User | null;
-  ticketType: TicketType | null;
+  ticketType: TicketType | undefined;
   ticket: Ticket;
   onclose: (state: boolean) => void;
 };

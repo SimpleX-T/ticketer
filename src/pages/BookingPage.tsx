@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Event, Ticket, TicketType, User } from "../types";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../services/supabaseClient";
 import { formatFullDate, formatTimeFromDateString } from "../utils/helpers";
@@ -12,10 +12,13 @@ import { CalendarDate } from "../components/ui/CalendarDate";
 import { TicketDetails } from "../components/bookings/TicketDetails";
 import Skeleton from "../components/bookings/Skeleton";
 import { bookTicket } from "../services/ticketServices";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function BookingPage() {
   const params = useParams<{ eventId: string }>();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [isLoading, setIsLoading] = useState(false);
   const [event, setEvent] = useState<Event | null>(null);
@@ -86,11 +89,9 @@ export default function BookingPage() {
     handleGetTicketTypeDetails();
   }, [ticketData.ticketTypeId]);
 
-  console.log(event?.id);
   const handleBookTicket = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log(event?.id, user?.id);
     if (!event?.id || !user?.id) return console.log("no ids");
     try {
       setIsLoading(true);
@@ -103,6 +104,8 @@ export default function BookingPage() {
       if (error) throw error;
 
       console.log(data);
+      queryClient.invalidateQueries({ queryKey: ["userTickets", user?.id] });
+      navigate("/dashboard");
     } catch (error) {
       console.log(error);
     } finally {

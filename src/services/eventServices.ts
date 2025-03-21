@@ -38,8 +38,23 @@ export const createEvent = async (
   });
 };
 
-export const getEventDetails = async (EventId: string) => {
-  console.log(EventId);
+export const getEventDetails = async (
+  eventId: string
+): Promise<Event | undefined> => {
+  if (!eventId) throw new Error("Event ID is required");
+  try {
+    const { data, error } = await supabase
+      .from("events")
+      .select("*")
+      .eq("id", eventId)
+      .single();
+
+    if (error) throw error;
+
+    return data as Event;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const getAllEvents = async () => {

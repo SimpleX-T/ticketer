@@ -20,3 +20,37 @@ export const bookTicket = async (
     return { success: false, error };
   }
 };
+
+export const getUserTickets = async (userId: string): Promise<Ticket[]> => {
+  if (!userId) throw new Error("User ID is required");
+  try {
+    const { data: userTickets, error } = await supabase
+      .from("tickets")
+      .select("*")
+      .eq("userId", userId);
+
+    if (error) throw error;
+
+    console.log(userTickets);
+    return userTickets;
+  } catch (error) {
+    console.error("Error getting user tickets:", error);
+    return [];
+  }
+};
+
+export const getTicketTypeById = async (ticketTypeId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("ticketTypes")
+      .select("*")
+      .eq("id", ticketTypeId)
+      .single();
+
+    if (error) throw error;
+
+    return data;
+  } catch (error) {
+    console.error("Error getting ticket type:", error);
+  }
+};

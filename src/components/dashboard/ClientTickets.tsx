@@ -2,13 +2,13 @@ import { Link } from "react-router-dom";
 import { useAppContext } from "../../contexts/AppContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { Ticket } from "../../types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FaPlus } from "react-icons/fa6";
 import { TicketCard } from "./TicketCard";
 // import { collection, getDocs, query, where } from "firebase/firestore";
 // import { db } from "../../services/firebase";
 import { useQuery } from "@tanstack/react-query";
-import { getUserTickets } from "../../hooks/useFirebaseTickets";
+import { getUserTickets } from "../../services/ticketServices";
 import TicketCardSkeleton from "./TicketCardSkeleton";
 import { FaSignOutAlt } from "react-icons/fa";
 
@@ -16,43 +16,13 @@ const ClientTickets = () => {
   const { user, handleLogout } = useAuth();
   const { deleteTicket } = useAppContext();
   const [openModal, setOpenModal] = useState<boolean>(false);
-  // const [userTickets, setUserTickets] = useState<Ticket[]>([]);
-  // const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
   const { data: userTickets, isLoading } = useQuery({
     queryFn: () => getUserTickets(user?.id || ""),
     queryKey: ["userTickets", user?.id],
     enabled: !!user,
   });
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-
-  useEffect(() => {
-    if (userTickets && userTickets.length > 0) {
-      setSelectedTicket(userTickets[0] as unknown as Ticket);
-    }
-  }, [userTickets]);
-
-  // useEffect(() => {
-  //   const getUserTickets = async () => {
-  //     if (!user) return;
-  //     try {
-  //       const userTickets: Ticket[] = [];
-  //       const fetchQuery = query(
-  //         collection(db, "tickets"),
-  //         where("userId", "==", user.id)
-  //       );
-  //       const tickets = await getDocs(fetchQuery);
-  //       if (tickets.empty) return;
-  //       tickets.forEach((doc) => userTickets.push(doc.data() as Ticket));
-  //       setUserTickets(userTickets);
-  //     } catch (error) {
-  //       console.log(error);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-  //   getUserTickets();
-  // }, [user]);
 
   const handleSelectTicket = (ticket: Ticket) => {
     setSelectedTicket(ticket);
