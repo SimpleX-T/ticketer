@@ -112,7 +112,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
       setIsAuthenticated(true);
 
       setLocalstorageData([
-        { title: USER_KEY, value: JSON.stringify(user.id) },
+        { title: USER_KEY, value: user.id },
         { title: AUTHENTICATION_KEY, value: JSON.stringify(true) },
       ]);
     } catch (err) {
