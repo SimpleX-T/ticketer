@@ -2,18 +2,38 @@ import { FaSignOutAlt, FaUserCog } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { FaTicket } from "react-icons/fa6";
+import { BiSolidDashboard } from "react-icons/bi";
+import { getRandomColorPair } from "../../utils/helpers";
 
 const Sidebar = () => {
   const { user, handleLogout } = useAuth();
   return (
-    <div className="w-64 bg-primary-200 text-secondary shadow-md h-screen p-4 flex flex-col pt-32 fixed top-0 left-0">
+    <div className="w-full bg-primary-200 text-secondary shadow-md h-screen p-4 flex flex-col pt-12">
       {/* Profile Section */}
-      <div className="text-center mb-6">
-        <img
-          src={user?.profileImage || "/default-avatar.png"}
-          alt="Profile"
-          className="w-20 h-20 mx-auto rounded-full border"
-        />
+      <div className="text-center mb-10">
+        <div className="rounded-full mx-auto h-20 w-20 border flex items-center justify-center overflow-hidden">
+          {user?.profileImage ? (
+            <img
+              src={user?.profileImage || "/default-avatar.png"}
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div
+              className="flex items-center justify-center w-full h-full"
+              style={{ backgroundColor: getRandomColorPair().bgColor }}
+            >
+              <span
+                className="text-xl font-bold"
+                style={{ color: getRandomColorPair().textColor }}
+              >
+                {user?.firstname?.charAt(0).toUpperCase()}
+                {user?.lastname?.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
+        </div>
+
         <h3 className="text-lg font-semibold mt-2">
           {user?.displayName || user?.firstname}
         </h3>
@@ -24,9 +44,10 @@ const Sidebar = () => {
       <nav className="flex-1 space-y-4">
         <NavLink
           to="/dashboard"
-          className="block p-2 hover:bg-secondary-200 rounded"
+          className="p-2 hover:bg-secondary-200 rounded flex items-center gap-2"
         >
-          🏠 Dashboard
+          <BiSolidDashboard />
+          <span>Dashboard</span>
         </NavLink>
         <NavLink
           to="/dashboard/tickets"
@@ -47,7 +68,7 @@ const Sidebar = () => {
       {/* Logout Button */}
       <button
         onClick={handleLogout}
-        className="mt-auto p-2 text-red-600 hover:bg-red-100 rounded flex items-center justify-center"
+        className="mt-auto p-2 text-secondary transition-colors duration-300 hover:text-red-400 hover:bg-secondary-200 cursor-pointer mb-6 rounded flex items-center"
       >
         <FaSignOutAlt className="mr-2" />
         Logout

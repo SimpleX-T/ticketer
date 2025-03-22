@@ -37,3 +37,28 @@ export const formatFullDate = (date: string) => {
     day: "numeric",
   });
 };
+
+
+export const getRandomColorPair = (): { bgColor: string; textColor: string } =>{
+
+  const randomHex = (): number => Math.floor(Math.random() * 256);
+
+
+  const rgbToHex = (r: number, g: number, b: number): string =>
+    `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b
+      .toString(16)
+      .padStart(2, "0")}`;
+
+
+  const r = randomHex();
+  const g = randomHex();
+  const b = randomHex();
+  const bgColor = rgbToHex(r, g, b);
+
+
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  const textColor = luminance > 0.5 ? "#000000" : "#FFFFFF";
+
+  return { bgColor, textColor };
+}
+

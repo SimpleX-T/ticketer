@@ -7,10 +7,9 @@ import { TicketCard } from "./TicketCard";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteTicket, getUserTickets } from "../../services/ticketServices";
 import TicketCardSkeleton from "./TicketCardSkeleton";
-import { FaSignOutAlt } from "react-icons/fa";
 
 const ClientTickets = () => {
-  const { user, handleLogout } = useAuth();
+  const { user } = useAuth();
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
@@ -39,9 +38,9 @@ const ClientTickets = () => {
   };
 
   return (
-    <div className="mx-auto p-6 bg-gradient-to-br min-h-screen py-24 from-secondary-300 to-primary-100">
+    <div>
       {/* User Info Section */}
-      <div className="bg-primary p-6 rounded-lg shadow-md relative">
+      {/* <div className="bg-primary p-6 rounded-lg shadow-md relative">
         <h2 className="text-2xl font-semibold text-secondary">User Profile</h2>
         <p className="text-secondary">
           <strong>Name:</strong> {user?.firstname} {user?.lastname}
@@ -58,10 +57,10 @@ const ClientTickets = () => {
         >
           <FaSignOutAlt />
         </button>
-      </div>
+      </div> */}
 
       {/* Tickets List */}
-      <div className="mt-6">
+      <div className="mt-6 px-12 p-6">
         <div className="flex items-center mb-4 justify-between">
           <h2 className="text-lg md:text-xl font-semibold text-secondary mr-auto">
             Booked Tickets
