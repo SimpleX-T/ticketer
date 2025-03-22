@@ -126,10 +126,10 @@ export default function BookingPage() {
                     alt={event.name}
                     className="w-full h-64 object-cover rounded-lg mb-4"
                   />
-                  <h2 className="text-2xl font-bold text-white mb-2">
+                  <h2 className="text-2xl font-bold text-secondary">
                     {event.name}
                   </h2>
-                  <p className="text-gray-300">{event.description}</p>
+                  <EventDescription event={event} withTitle={false} />
                 </div>
 
                 <hr className="border-[0.5px] border-secondary-200" />
@@ -189,7 +189,7 @@ export default function BookingPage() {
                     <div className="flex items-center gap-1 p-1 bg-secondary-200 rounded-md">
                       <span className="text-sm text-secondary">Hosted by</span>
                       <span className="text-secondary text-sm">
-                        {organizer.displayName || ""}
+                        {organizer.displayName || organizer.firstname}
                       </span>
                     </div>
                   </div>
@@ -275,3 +275,46 @@ export default function BookingPage() {
     </div>
   );
 }
+
+const EventDescription = ({
+  event,
+  withTitle,
+}: {
+  event: Event;
+  withTitle?: boolean;
+}) => {
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+  return (
+    <div>
+      {withTitle && (
+        <h2 className="text-lg font-bold mb-2 text-secondary">Description</h2>
+      )}
+
+      <p
+        className={`text-secondary-100 text-sm ${
+          isCollapsed ? "line-clamp-1" : ""
+        }`}
+      >
+        {event.description}
+      </p>
+      <button
+        onClick={toggleCollapse}
+        className="text-secondary text-xs flex items-center gap-1"
+      >
+        {isCollapsed ? (
+          <>
+            <span>Read more</span>
+          </>
+        ) : (
+          <>
+            <span>Read less</span>
+          </>
+        )}
+      </button>
+    </div>
+  );
+};

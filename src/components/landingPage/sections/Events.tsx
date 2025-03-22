@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useState } from "react";
-import { useGetEvents } from "../../../hooks/useQueryHooks";
+import { useGetRecentEvents } from "../../../hooks/useQueryHooks";
 import { Link } from "react-router-dom";
 import { FaArrowRight, FaMarker } from "react-icons/fa6";
 import { FiSearch } from "react-icons/fi";
@@ -11,7 +11,7 @@ export default function Events() {
   const [categoryFilter, setCategoryFilter] = useState("all");
 
   // Fetch real events from Firestore using React Query
-  const { data: events = [], isLoading, error } = useGetEvents();
+  const { data: events = [], isLoading, error } = useGetRecentEvents();
 
   // Filter events based on search term and category
   const filteredEvents = events.slice(0, 3).filter((event: Event) => {

@@ -89,7 +89,7 @@ export default function EventCreationForm() {
               className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormInput<string>
                 type="datetime-local"
                 value={formData.startDate}
@@ -163,7 +163,10 @@ export default function EventCreationForm() {
                   type="text"
                   placeholder="Image URL"
                   value={imageUrl || ""}
-                  onChange={handleImageUrlChange}
+                  onChange={(e) => {
+                    setImageUrl(e.target.value);
+                    handleImageUrlChange(e);
+                  }}
                   className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
                   disabled={!!imageFile}
                 />
