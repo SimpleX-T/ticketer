@@ -54,3 +54,16 @@ export const getTicketTypeById = async (ticketTypeId: string) => {
     console.error("Error getting ticket type:", error);
   }
 };
+
+export const deleteTicket = async (ticketId: string) => {
+  if (!ticketId) throw new Error("Ticket ID is required");
+  try {
+    const { error } = await supabase
+      .from("tickets")
+      .delete()
+      .eq("id", ticketId);
+    if (error) throw error;
+  } catch (error) {
+    console.error(error);
+  }
+};

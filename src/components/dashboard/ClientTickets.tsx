@@ -1,22 +1,20 @@
 import { Link } from "react-router-dom";
-import { useAppContext } from "../../contexts/AppContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { Ticket } from "../../types";
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa6";
 import { TicketCard } from "./TicketCard";
-// import { collection, getDocs, query, where } from "firebase/firestore";
-// import { db } from "../../services/firebase";
-import { useQuery } from "@tanstack/react-query";
-import { getUserTickets } from "../../services/ticketServices";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { deleteTicket, getUserTickets } from "../../services/ticketServices";
 import TicketCardSkeleton from "./TicketCardSkeleton";
 import { FaSignOutAlt } from "react-icons/fa";
 
 const ClientTickets = () => {
   const { user, handleLogout } = useAuth();
-  const { deleteTicket } = useAppContext();
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+
+  const queryClient = useQueryClient();
 
   const { data: userTickets, isLoading } = useQuery({
     queryFn: () => getUserTickets(user?.id || ""),
@@ -29,9 +27,15 @@ const ClientTickets = () => {
     setOpenModal(true);
   };
 
-  const handleDeleteTicket = (ticketId: string | number) => {
-    if (!ticketId) return;
-    deleteTicket(ticketId);
+  const deleteMutation = useMutation({
+    mutationFn: deleteTicket,
+    onError: (error) => console.error(error),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userTickets"] });
+    },
+  });
+  const handleDeleteTicket = (ticketId: string) => {
+    deleteMutation.mutate(ticketId);
   };
 
   return (

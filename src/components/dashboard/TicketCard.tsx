@@ -18,7 +18,7 @@ export const TicketCard = ({
 }: {
   ticket: Ticket;
   onSelect: (ticket: Ticket) => void;
-  deleteTicket: (id: string | number) => void;
+  deleteTicket: (id: string) => void;
   openModal: boolean;
   setOpenModal: (state: boolean) => void;
   selectedTicket: Ticket;
