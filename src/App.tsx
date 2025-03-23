@@ -11,8 +11,8 @@ import UserDashboard from "./pages/dashboard";
 import CreateEvent from "./pages/CreateEvent";
 import Signup from "./pages/auth/signup";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import Settings from "./components/dashboard/Settings";
-import ClientTickets from "./components/dashboard/ClientTickets";
+import Settings from "./components/dashboard/settings";
+import ClientTickets from "./components/dashboard/clientTickets";
 
 const queryClient = new QueryClient();
 
@@ -28,9 +28,9 @@ const router = createBrowserRouter([
       {
         path: "/events/:eventId",
         element: (
-          <ProtectedRoute>
-            <BookingPage />
-          </ProtectedRoute>
+          // <ProtectedRoute>
+          <BookingPage />
+          // </ProtectedRoute>
         ),
       },
       {
@@ -42,15 +42,7 @@ const router = createBrowserRouter([
         element: <Signup />,
       },
       {
-        path: "/my-tickets",
-        element: (
-          <ProtectedRoute>
-            <div>My Tickets</div>
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "/create-event",
+        path: "/create",
         element: (
           <ProtectedRoute>
             <CreateEvent />

@@ -43,7 +43,7 @@ export default function Header() {
       <div className="flex items-center space-x-3">
         {/* Tickets Button */}
         <Link
-          to="/dashboard"
+          to="/dashboard/tickets"
           className={`relative border text-secondary p-2 md:px-4 py-2 rounded-full hidden lg:flex items-center bg-primary-300 hover:bg-primary-100 transition-colors duration-300`}
         >
           <FaTicketAlt className="mr-2" />

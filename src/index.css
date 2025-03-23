@@ -21,3 +21,7 @@ body {
   background: url(/subtract.png) center center no-repeat;
   background-size: 100% 100%;
 }
+
+.dashboard-nav.active {
+  background-color: var(--color-secondary-200);
+}

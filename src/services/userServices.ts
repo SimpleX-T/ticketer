@@ -75,18 +75,22 @@ export const updateUser = async (
   userId: string,
   data: { field: string; value: unknown }[]
 ) => {
+  if (!userId || !data) throw new Error("User ID and update fields are required")
+
   try {
-    const updates = data.map(async (item) => {
-      const { error } = await supabase
-        .from("users")
-        .update({ [item.field]: item.value })
-        .eq("id", userId);
+    const updateFields = data.reduce((acc, item) => {
+      acc[item.field] = item.value;
+      return acc;
+    }, {} as Record<string, unknown>);
 
-      if (error) throw error;
-    });
-
-    await Promise.all(updates);
-    return { success: true };
+    const { data: updatedUser, error } = await supabase
+      .from("users")
+      .update(updateFields)
+      .eq("id", userId)
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, updatedUser };
   } catch (error) {
     console.error("Error updating user:", error);
     return { success: false, error };
