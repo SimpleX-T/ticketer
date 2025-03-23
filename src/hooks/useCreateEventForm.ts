@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Event, TicketType } from "../types";
 import { useAuth } from "../contexts/AuthContext";
 import { INITIAL_TICKET_TYPE } from "../utils/constants";
+import { uploadToCloudinary } from "../utils/helpers";
 
 export const useEventForm = (
   createEvent: (
@@ -75,12 +76,12 @@ export const useEventForm = (
     }
   };
 
-  // ✅ Add Ticket Type
+
   const addTicketType = () => {
     setTicketTypes((prev) => [...prev, { ...INITIAL_TICKET_TYPE }]);
   };
 
-  // ✅ Remove Ticket Type
+
   const removeTicketType = (index: number) => {
     setTicketTypes((prev) => {
       const newTypes = prev.filter((_, i) => i !== index);
@@ -93,7 +94,7 @@ export const useEventForm = (
     });
   };
 
-  // ✅ Handle Form Submission
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -122,28 +123,15 @@ export const useEventForm = (
 
       let _imageUrl = imageUrl;
 
-      // ✅ Handle Image Upload
+
       if (imageFile) {
-        const _formData = new FormData();
-        _formData.append("file", imageFile);
-        _formData.append(
-          "upload_preset",
-          import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET!
-        );
+        const response = await uploadToCloudinary(imageFile);
 
-        const response = await fetch(
-          `https://api.cloudinary.com/v1_1/${
-            import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
-          }/image/upload`,
-          { method: "POST", body: _formData }
-        );
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Upload failed");
-        _imageUrl = data.secure_url;
+        if (!response) throw new Error("Image upload failed");
+        _imageUrl = response;
       }
 
-      // ✅ Prepare Event Data
+
       const eventData: Omit<
         Event,
         "id" | "createdAt" | "ticketsSold" | "soldOut"
@@ -153,7 +141,7 @@ export const useEventForm = (
         ticketTypes,
       };
 
-      // ✅ Create Event
+
       await createEvent(eventData);
       navigate("/dashboard");
     } catch (err) {
@@ -163,7 +151,7 @@ export const useEventForm = (
     }
   };
 
-  // ✅ Return Hook Values
+
   return {
     formData,
     ticketTypes,

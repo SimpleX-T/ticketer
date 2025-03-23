@@ -1,22 +1,19 @@
 import { Link } from "react-router-dom";
-import { useAppContext } from "../../contexts/AppContext";
-import { useAuth } from "../../contexts/AuthContext";
-import { Ticket } from "../../types";
+import { useAuth } from "../../../contexts/AuthContext";
+import { Ticket } from "../../../types";
 import { useState } from "react";
-import { FaPlus } from "react-icons/fa6";
+import { FaPlus, FaWpexplorer } from "react-icons/fa6";
 import { TicketCard } from "./TicketCard";
-// import { collection, getDocs, query, where } from "firebase/firestore";
-// import { db } from "../../services/firebase";
-import { useQuery } from "@tanstack/react-query";
-import { getUserTickets } from "../../services/ticketServices";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { deleteTicket, getUserTickets } from "../../../services/ticketServices";
 import TicketCardSkeleton from "./TicketCardSkeleton";
-import { FaSignOutAlt } from "react-icons/fa";
 
 const ClientTickets = () => {
-  const { user, handleLogout } = useAuth();
-  const { deleteTicket } = useAppContext();
+  const { user } = useAuth();
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+
+  const queryClient = useQueryClient();
 
   const { data: userTickets, isLoading } = useQuery({
     queryFn: () => getUserTickets(user?.id || ""),
@@ -29,53 +26,40 @@ const ClientTickets = () => {
     setOpenModal(true);
   };
 
-  const handleDeleteTicket = (ticketId: string | number) => {
-    if (!ticketId) return;
-    deleteTicket(ticketId);
+  const deleteMutation = useMutation({
+    mutationFn: deleteTicket,
+    onError: (error) => console.error(error),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userTickets"] });
+    },
+  });
+  const handleDeleteTicket = (ticketId: string) => {
+    deleteMutation.mutate(ticketId);
   };
 
   return (
-    <div className="mx-auto p-6 bg-gradient-to-br min-h-screen py-24 from-secondary-300 to-primary-100">
-      {/* User Info Section */}
-      <div className="bg-primary p-6 rounded-lg shadow-md relative">
-        <h2 className="text-2xl font-semibold text-secondary">User Profile</h2>
-        <p className="text-secondary">
-          <strong>Name:</strong> {user?.firstname} {user?.lastname}
-        </p>
-        <p className="text-secondary">
-          <strong>Email:</strong> {user?.email}
-        </p>
-
-        <button
-          className="absolute top-12 right-12 text-3xl cursor-pointer hover:text-secondary-100 transition-colors duration-300 text-secondary"
-          onClick={() => {
-            handleLogout();
-          }}
-        >
-          <FaSignOutAlt />
-        </button>
-      </div>
-
+    <div>
       {/* Tickets List */}
-      <div className="mt-6">
-        <div className="flex items-center mb-4 justify-between">
+      <div className="mt-10 md:mt-6 p-4">
+        <div className="flex items-center mb-8 md:mb-4 justify-between">
           <h2 className="text-lg md:text-xl font-semibold text-secondary mr-auto">
             Booked Tickets
           </h2>
           {user?.role === "organizer" || user?.role === "admin" ? (
             <Link
-              to="/create-event"
+              to="/create"
               className="flex items-center gap-1 p-2 rounded-sm cursor-pointer hover:bg-secondary/70 transition-colors duration-150 bg-secondary text-white text-xs"
             >
               <FaPlus />
-              <span>Create Event</span>
+              <span className="hidden md:block">Create Event</span>
             </Link>
           ) : (
             <Link
               to="/#events"
               className="flex items-center gap-1 p-2 rounded-sm cursor-pointer hover:bg-secondary/70 transition-colors duration-150 bg-secondary text-white text-xs"
             >
-              <span>Explore Events</span>
+              <FaWpexplorer />
+              <span className="hidden md:block">Explore Events</span>
             </Link>
           )}
         </div>
@@ -86,7 +70,7 @@ const ClientTickets = () => {
             ))}
           </div>
         ) : (
-          <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-4 relative md:p-2 items-start">
+          <div className="grid-cols-1 md:grid-cols-2 grid lg:grid-cols-3 gap-4 relative md:p-2 items-start">
             {userTickets && userTickets?.length > 0 ? (
               userTickets.map((ticket) => (
                 <TicketCard

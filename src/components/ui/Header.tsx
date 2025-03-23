@@ -1,6 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
-import { useAppContext } from "../../contexts/AppContext";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FaTicketAlt, FaUserCircle } from "react-icons/fa";
 import { HiMenu, HiX } from "react-icons/hi";
 import { motion, AnimatePresence } from "motion/react";
@@ -8,18 +7,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { navItems } from "../../utils/constants";
 
 export default function Header() {
-  const { userTickets } = useAppContext();
   const { user } = useAuth();
-  const [addEffect, setAddEffect] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    setAddEffect(true);
-    const timeout = setTimeout(() => {
-      setAddEffect(false);
-    }, 500);
-    return () => clearTimeout(timeout);
-  }, [userTickets]);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -27,7 +16,7 @@ export default function Header() {
 
   return (
     <header className="px-4 py-2 flex z-[999] justify-between items-center bg-primary-300/70 border border-secondary-100 fixed top-4 left-1/2 -translate-x-1/2 max-w-6xl mx-auto w-[95%] rounded-md lg:rounded-full backdrop-blur-md shadow-lg">
-      <Link to="/" className="w-[80px] md:w-[150px]">
+      <Link to="/" className="w-14 pl-4">
         <img src="/logo.svg" alt="Tesarus" className="h-10 md:h-12" />
       </Link>
 
@@ -54,18 +43,11 @@ export default function Header() {
       <div className="flex items-center space-x-3">
         {/* Tickets Button */}
         <Link
-          to="/dashboard"
-          className={`relative border text-secondary p-2 md:px-4 py-2 rounded-full hidden lg:flex items-center ${
-            addEffect ? "bg-white/40" : "bg-primary-300"
-          } hover:bg-primary-100 transition-colors duration-300`}
+          to="/dashboard/tickets"
+          className={`relative border text-secondary p-2 md:px-4 py-2 rounded-full hidden lg:flex items-center bg-primary-300 hover:bg-primary-100 transition-colors duration-300`}
         >
           <FaTicketAlt className="mr-2" />
           <span>MY TICKETS</span>
-          {userTickets.length > 0 && (
-            <span className="absolute -top-2 -right-2 w-5 h-5 text-xs text-white rounded-full flex items-center justify-center bg-secondary">
-              {userTickets.length}
-            </span>
-          )}
         </Link>
 
         {/* User Profile or Login */}
