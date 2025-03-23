@@ -38,6 +38,7 @@ export const createEvent = async (
   });
 };
 
+// This function fetches the event together with its ticketTypes
 export const getEventDetails = async (
   eventId: string
 ): Promise<Event | undefined> => {
@@ -75,4 +76,21 @@ export const getAllEvents = async () => {
   if (error) throw error;
 
   return events;
+};
+
+export const getUpcomingEvents = async () => {
+  const today = new Date().toISOString().split("T")[0];
+
+  const { data: upcomingEvents, error } = await supabase
+    .from("events")
+    .select("*")
+    .gte("startDate", today)
+    .order("startDate", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching upcoming events:", error);
+    throw new Error(error.message);
+  }
+
+  return upcomingEvents;
 };

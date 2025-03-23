@@ -13,6 +13,7 @@ import Signup from "./pages/auth/signup";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import Settings from "./components/dashboard/settings";
 import ClientTickets from "./components/dashboard/clientTickets";
+import Home from "./components/dashboard/Home";
 
 const queryClient = new QueryClient();
 
@@ -60,29 +61,8 @@ const router = createBrowserRouter([
     ),
     children: [
       {
-        path: "dashboard",
-        element: (
-          <div className="text-center mt-10 z-50">
-            <h2 className="text-2xl font-semibold text-gray-700">Welcome,</h2>
-            <p className="text-gray-600 mt-2">
-              Manage your tickets and profile easily.
-            </p>
-            {/* <div className="mt-6 flex justify-center gap-4">
-                          <Link
-                            to="/dashboard/tickets"
-                            className="px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600"
-                          >
-                            View My Tickets
-                          </Link>
-                          <Link
-                            to="/dashboard/settings"
-                            className="px-4 py-2 bg-green-500 text-white rounded shadow hover:bg-green-600"
-                          >
-                            Edit Profile
-                          </Link>
-                        </div> */}
-          </div>
-        ),
+        path: "/dashboard",
+        element: <Home />,
       },
       {
         path: "settings",
