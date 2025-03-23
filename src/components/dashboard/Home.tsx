@@ -36,13 +36,13 @@ export default function Home() {
   });
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-6 pt-18 md:p-10">
       {/* Welcome Section */}
       <div className="mb-8">
         <h2 className="text-2xl md:text-3xl font-semibold text-secondary">
           Welcome, {user?.displayName || user?.firstname || "User"}!
         </h2>
-        <p className="text-gray-600 mt-2">
+        <p className="text-secondary-100 mt-2">
           Manage your tickets and profile with ease.
         </p>
       </div>
