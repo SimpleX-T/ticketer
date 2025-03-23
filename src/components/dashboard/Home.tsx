@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { FaTicketAlt } from "react-icons/fa";
 import { BiSolidDashboard } from "react-icons/bi";
-import { Event, Ticket } from "../../types";
-import { getUserTickets } from "../../services/ticketServices";
+import {
+  Event,
+  // Ticket
+} from "../../types";
+// import { getUserTickets } from "../../services/ticketServices";
 import { getUpcomingEvents } from "../../services/eventServices";
 import { EventCard } from "../ui/EventCard";
 
@@ -12,15 +15,15 @@ export default function Home() {
   const { user } = useAuth();
 
   // Fetch user's tickets with React Query
-  const {
-    data: tickets,
-    isLoading: ticketsLoading,
-    error: ticketsError,
-  } = useQuery<Ticket[]>({
-    queryKey: ["userTickets", user?.id],
-    queryFn: () => getUserTickets(user?.id || ""),
-    enabled: !!user?.id,
-  });
+  // const {
+  //   data: tickets,
+  //   isLoading: ticketsLoading,
+  //   error: ticketsError,
+  // } = useQuery<Ticket[]>({
+  //   queryKey: ["userTickets", user?.id],
+  //   queryFn: () => getUserTickets(user?.id || ""),
+  //   enabled: !!user?.id,
+  // });
 
   // Fetch upcoming events
   const {

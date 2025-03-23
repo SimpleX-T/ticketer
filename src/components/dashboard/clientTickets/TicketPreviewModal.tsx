@@ -57,7 +57,7 @@ export const TicketPreviewModal: React.FC<TicketPreviewModalProps> = ({
             <div className="space-y-1 text-gray-300">
               <p className="text-sm flex items-center justify-center gap-1">
                 <BiCalendar className="inline-block" />
-                {formatDateString(ticketEvent?.startDate)}
+                {formatDateString(ticketEvent?.startDate || "")}
               </p>
               <p className="text-sm">{ticketEvent?.location}</p>
             </div>

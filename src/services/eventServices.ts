@@ -38,6 +38,7 @@ export const createEvent = async (
   });
 };
 
+// This function fetches the event together with its ticketTypes
 export const getEventDetails = async (
   eventId: string
 ): Promise<Event | undefined> => {
