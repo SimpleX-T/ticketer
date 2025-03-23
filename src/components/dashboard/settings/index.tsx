@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
 import { updateUser } from "../../../services/userServices";
 import { uploadToCloudinary } from "../../../utils/helpers";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Settings = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
     firstname: user?.firstname || "",
@@ -25,6 +27,15 @@ const Settings = () => {
       setSelectedImage(e.target.files[0]);
     }
   };
+
+  const updateMutation = useMutation({
+    mutationFn: (formData: { field: string; value: unknown }[]) =>
+      updateUser(user!.id, formData),
+    onMutate: async (updatedFields) => {
+      queryClient.setQueryData(["user"], updatedFields);
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+  });
 
   const handleSave = async () => {
     if (!user) return;
@@ -55,7 +66,7 @@ const Settings = () => {
 
       // If there are changes, send the update request
       if (updatedFields.length > 0) {
-        const response = await updateUser(user.id, updatedFields);
+        const response = await updateMutation.mutateAsync(updatedFields);
         console.log("Update response:", response);
       } else {
         console.log("No changes detected.");
