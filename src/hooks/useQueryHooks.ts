@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { getAllEvents } from "../services/eventServices";
+import { getRecentEvents } from "../services/eventServices";
 
 // Query keys
 export const queryKeys = {
@@ -9,10 +9,10 @@ export const queryKeys = {
 };
 
 // Hook for fetching all published events
-export const useGetEvents = () => {
+export const useGetRecentEvents = () => {
   return useQuery({
     queryKey: [queryKeys.events],
-    queryFn: getAllEvents,
+    queryFn: getRecentEvents,
   });
 };
 

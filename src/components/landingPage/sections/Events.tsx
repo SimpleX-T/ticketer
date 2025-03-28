@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useState } from "react";
-import { useGetEvents } from "../../../hooks/useQueryHooks";
+import { useGetRecentEvents } from "../../../hooks/useQueryHooks";
 import { Link } from "react-router-dom";
 import { FaArrowRight, FaMarker } from "react-icons/fa6";
 import { FiSearch } from "react-icons/fi";
@@ -11,7 +11,7 @@ export default function Events() {
   const [categoryFilter, setCategoryFilter] = useState("all");
 
   // Fetch real events from Firestore using React Query
-  const { data: events = [], isLoading, error } = useGetEvents();
+  const { data: events = [], isLoading, error } = useGetRecentEvents();
 
   // Filter events based on search term and category
   const filteredEvents = events.slice(0, 3).filter((event: Event) => {
@@ -86,7 +86,12 @@ export default function Events() {
           </p>
         </div>
       ) : (
+<<<<<<< HEAD
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto gap-8 md:px-16 px-2">
+=======
+        // <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8 max-w-7xl mx-auto place-items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+>>>>>>> master
           {displayEvents.length > 0 ? (
             displayEvents.map((event: Event) => (
               <motion.div

@@ -58,6 +58,18 @@ export const getEventDetails = async (
   }
 };
 
+export const getRecentEvents = async () => {
+  const { data, error } = await supabase
+    .from("events")
+    .select("*")
+    .order("createdAt", { ascending: false })
+    .limit(6);
+
+  if (error) throw error;
+
+  return data;
+};
+
 export const getAllEvents = async () => {
   const { data: events, error } = await supabase.from("events").select("*");
 
