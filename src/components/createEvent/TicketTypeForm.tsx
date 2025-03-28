@@ -21,9 +21,9 @@ export const TicketTypeForm = ({
   index,
 }: TicketTypeFormProps) => {
   return (
-    <div className="border p-4 rounded space-y-4">
+    <div className="border p-4 rounded-lg space-y-4 border-secondary/30">
       <div className="flex justify-between">
-        <h4 className="font-medium capitalize">
+        <h4 className="font-medium capitalize text-secondary">
           {ticket.name || `Ticket Type ${index + 1}`}
         </h4>
 
@@ -51,7 +51,7 @@ export const TicketTypeForm = ({
             onChange={(e) =>
               handleTicketTypeChange(index, "name", e.target.value)
             }
-            className="p-2 border rounded outline-none w-full focus:ring-2 focus:ring-primary-100"
+            className="p-2 border border-secondary/30  text-secondary rounded-md outline-none w-full focus:ring-2 focus:ring-primary-100"
             required
           />
         </div>
@@ -65,7 +65,7 @@ export const TicketTypeForm = ({
             onChange={(e) =>
               handleTicketTypeChange(index, "type", e.target.value)
             }
-            className="p-2 border rounded outline-none w-full focus:ring-2 focus:ring-primary-100"
+            className="p-2 border border-secondary/30  text-secondary rounded-md outline-none w-full focus:ring-2 focus:ring-primary-100"
             required
           >
             <option value="regular">Regular</option>
@@ -85,7 +85,7 @@ export const TicketTypeForm = ({
             onChange={(e) =>
               handleTicketTypeChange(index, "price", Number(e.target.value))
             }
-            className="p-2 border rounded outline-none w-full focus:ring-2 focus:ring-primary-100"
+            className="p-2 border border-secondary/30  text-secondary rounded-md outline-none w-full focus:ring-2 focus:ring-primary-100"
             min="0"
             required
           />
@@ -102,7 +102,7 @@ export const TicketTypeForm = ({
             onChange={(e) =>
               handleTicketTypeChange(index, "total", Number(e.target.value))
             }
-            className="p-2 border rounded outline-none w-full focus:ring-2 focus:ring-primary-100"
+            className="p-2 border border-secondary/30  text-secondary rounded-md outline-none w-full focus:ring-2 focus:ring-primary-100"
             min="1"
             required
           />
@@ -121,7 +121,7 @@ export const TicketTypeForm = ({
             onChange={(e) =>
               handleTicketTypeChange(index, "description", e.target.value)
             }
-            className="p-2 border rounded col-span-2 outline-none w-full focus:ring-2 focus:ring-primary-100"
+            className="p-2 border border-secondary/30  text-secondary rounded-md col-span-2 outline-none w-full focus:ring-2 focus:ring-primary-100"
           />
         </div>
 
@@ -143,7 +143,7 @@ export const TicketTypeForm = ({
                 e.target.value.split(",").map((b) => b.trim())
               )
             }
-            className="p-2 border rounded col-span-2 w-full outline-none focus:ring-2 focus:ring-primary-100"
+            className="p-2 border border-secondary/30  text-secondary rounded-md col-span-2 w-full outline-none focus:ring-2 focus:ring-primary-100"
           />
         </div>
       </div>

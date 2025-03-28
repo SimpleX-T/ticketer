@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EventDetails } from "./EventDetails";
 import { BookingForm } from "./BookingForm";
-import { TicketAvailability } from "./TicketAvailability";
+// import { TicketAvailability } from "./TicketAvailability";
 import { useQueryClient } from "@tanstack/react-query";
 import { Event, User } from "../../types";
 import { useAuth } from "../../contexts/AuthContext";
@@ -58,7 +58,7 @@ export default function Booking() {
             onSubmit={handleBookingSubmit}
           />
         </main>
-        <TicketAvailability event={event} />
+        {/* <TicketAvailability event={event} /> */}
       </section>
     </div>
   );

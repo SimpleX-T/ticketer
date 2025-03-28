@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FaTicketAlt, FaUserCircle } from "react-icons/fa";
 import { HiMenu, HiX } from "react-icons/hi";
 import { motion, AnimatePresence } from "motion/react";
@@ -9,15 +9,40 @@ import { navItems } from "../../utils/constants";
 export default function Header() {
   const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null); // Ref to track the mobile menu
 
+  // Toggle mobile menu
   const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
+    setMobileMenuOpen((prev) => !prev);
   };
+
+  // Close menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        mobileMenuOpen
+      ) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    // Add event listener when menu is open
+    if (mobileMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    // Cleanup listener on unmount or when menu closes
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [mobileMenuOpen]);
 
   return (
     <header className="px-4 py-2 flex z-[999] justify-between items-center bg-primary-300/70 border border-secondary-100 fixed top-4 left-1/2 -translate-x-1/2 max-w-6xl mx-auto w-[95%] rounded-md lg:rounded-full backdrop-blur-md shadow-lg">
       <Link to="/" className="w-14 pl-4">
-        <img src="/logo.svg" alt="Tesarus" className="h-10 md:h-12" />
+        <img src="/logo.svg" alt="Tesarus" className="h-9 md:h-12" />
       </Link>
 
       {/* Desktop Navigation */}
@@ -84,6 +109,7 @@ export default function Header() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
+            ref={menuRef} // Attach ref to the mobile menu
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -102,7 +128,7 @@ export default function Header() {
                         : "text-secondary hover:text-white hover:bg-primary-100/30"
                     }`
                   }
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => setMobileMenuOpen(false)} // Close on link click
                 >
                   {item.icon && <item.icon className="mr-3 text-sm" />}
                   {item.label}

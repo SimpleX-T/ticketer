@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import { Ticket } from "../../../types";
 import { useState } from "react";
-import { FaPlus, FaWpexplorer } from "react-icons/fa6";
 import { TicketCard } from "./TicketCard";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteTicket, getUserTickets } from "../../../services/ticketServices";
@@ -33,45 +32,29 @@ const ClientTickets = () => {
       queryClient.invalidateQueries({ queryKey: ["userTickets"] });
     },
   });
+
   const handleDeleteTicket = (ticketId: string) => {
     deleteMutation.mutate(ticketId);
   };
 
   return (
-    <div>
+    <div className="min-h-screen w-full bg-gradient-to-br from-primary via-primary-200 to-primary-100 flex flex-col">
       {/* Tickets List */}
-      <div className="mt-10 md:mt-6 p-4">
-        <div className="flex items-center mb-8 md:mb-4 justify-between">
-          <h2 className="text-lg md:text-xl font-semibold text-secondary mr-auto">
+      <div className="flex-1 w-full p-6 pt-20 md:pt-16">
+        <div className="mb-8">
+          <h2 className="text-xl md:text-2xl font-semibold text-secondary">
             Booked Tickets
           </h2>
-          {user?.role === "organizer" || user?.role === "admin" ? (
-            <Link
-              to="/create"
-              className="flex items-center gap-1 p-2 rounded-sm cursor-pointer hover:bg-secondary/70 transition-colors duration-150 bg-secondary text-white text-xs"
-            >
-              <FaPlus />
-              <span className="hidden md:block">Create Event</span>
-            </Link>
-          ) : (
-            <Link
-              to="/#events"
-              className="flex items-center gap-1 p-2 rounded-sm cursor-pointer hover:bg-secondary/70 transition-colors duration-150 bg-secondary text-white text-xs"
-            >
-              <FaWpexplorer />
-              <span className="hidden md:block">Explore Events</span>
-            </Link>
-          )}
         </div>
         {isLoading ? (
-          <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, index) => (
               <TicketCardSkeleton key={index} />
             ))}
           </div>
         ) : (
-          <div className="grid-cols-1 md:grid-cols-2 grid lg:grid-cols-3 gap-4 relative md:p-2 items-start">
-            {userTickets && userTickets?.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+            {userTickets && userTickets.length > 0 ? (
               userTickets.map((ticket) => (
                 <TicketCard
                   ticket={ticket}
@@ -84,14 +67,19 @@ const ClientTickets = () => {
                 />
               ))
             ) : (
-              <p className="text-secondary mt-4 text-center">
-                No tickets booked yet.
-                <br />
-                <Link to="/#events" className="underline">
-                  Explore
-                </Link>{" "}
-                events here
-              </p>
+              <div className="col-span-full text-center text-secondary py-10">
+                <p className="text-lg">
+                  No tickets booked yet.
+                  <br />
+                  <Link
+                    to="/events"
+                    className="underline hover:text-secondary-200 transition-colors"
+                  >
+                    Explore
+                  </Link>{" "}
+                  events here
+                </p>
+              </div>
             )}
           </div>
         )}

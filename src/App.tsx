@@ -12,8 +12,11 @@ import CreateEvent from "./pages/CreateEvent";
 import Signup from "./pages/auth/signup";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import Settings from "./components/dashboard/settings";
-import ClientTickets from "./components/dashboard/clientTickets";
 import Home from "./components/dashboard/Home";
+import EventsPage from "./pages/EventsPage";
+import AboutUs from "./pages/About";
+import Tickets from "./pages/dashboard/Tickets";
+import Events from "./pages/dashboard/Events";
 
 const queryClient = new QueryClient();
 
@@ -27,14 +30,6 @@ const router = createBrowserRouter([
         element: <LandingPage />,
       },
       {
-        path: "/events/:eventId",
-        element: (
-          // <ProtectedRoute>
-          <BookingPage />
-          // </ProtectedRoute>
-        ),
-      },
-      {
         path: "/login",
         element: <Login />,
       },
@@ -43,12 +38,24 @@ const router = createBrowserRouter([
         element: <Signup />,
       },
       {
+        path: "/about",
+        element: <AboutUs />,
+      },
+      {
+        path: "/events/:eventId",
+        element: <BookingPage />,
+      },
+      {
         path: "/create",
         element: (
           <ProtectedRoute>
             <CreateEvent />
           </ProtectedRoute>
         ),
+      },
+      {
+        path: "/events",
+        element: <EventsPage />,
       },
     ],
   },
@@ -76,7 +83,15 @@ const router = createBrowserRouter([
         path: "tickets",
         element: (
           <ProtectedRoute>
-            <ClientTickets />
+            <Tickets />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "events",
+        element: (
+          <ProtectedRoute>
+            <Events />
           </ProtectedRoute>
         ),
       },

@@ -1,21 +1,31 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { FaPlus, FaX } from "react-icons/fa6";
+import { FaChevronLeft, FaPlus, FaX } from "react-icons/fa6";
 import { ScrollRestoration, useNavigate } from "react-router-dom";
+import { useEventForm } from "../../hooks/useCreateEventForm";
 import { createEvent } from "../../services/eventServices";
 import FormInput from "./FormInput";
 import { TicketTypeForm } from "./TicketTypeForm";
 import ImagePreview from "./ImagePreview";
-import { useEventForm } from "../../hooks/useCreateEventForm";
+import { DatePickerWithRange } from "../ui/date-picker-with-range";
+import { Button } from "../ui/button";
+import { DateRange } from "react-day-picker";
+import { format } from "date-fns";
 
 export default function EventCreationForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [imageFile, setImageFile] = useState<File | undefined>(undefined);
-  const [imageUrl, setImageUrl] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+  const [formDateRange, setFormDateRange] = useState<DateRange | undefined>(
+    undefined
+  );
+
   const {
+    imageUrl,
+    imageFile,
+    setImageUrl,
+    setImageFile,
     formData,
     ticketTypes,
     handleImageUrlChange,
@@ -31,104 +41,119 @@ export default function EventCreationForm() {
 
   useEffect(() => {
     return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [previewUrl]);
 
   if (!user) {
-    return <div className="text-center py-10">Loading...</div>;
+    return <div className="text-center py-10 text-white">Loading...</div>;
   }
 
+  const handleDateRangeChange = (dateRange: DateRange | undefined) => {
+    // Update the date range state
+    setFormDateRange(dateRange);
+
+    // Format dates for form data and update form state
+    if (dateRange?.from) {
+      const formattedStartDate = format(
+        dateRange.from,
+        "yyyy-MM-dd'T'HH:mm:ss"
+      );
+
+      if (dateRange.to) {
+        const formattedEndDate = format(dateRange.to, "yyyy-MM-dd'T'HH:mm:ss");
+
+        // Update both dates in form data
+        setFormData((prev) => ({
+          ...prev,
+          startDate: formattedStartDate,
+          endDate: formattedEndDate,
+        }));
+      } else {
+        // Update only start date if end date is not selected
+        setFormData((prev) => ({
+          ...prev,
+          startDate: formattedStartDate,
+        }));
+      }
+    }
+  };
+
   return (
-    <main className="w-full min-h-screen bg-gradient-to-br from-primary py-24 via-primary-200 to-primary-100 p-6">
+    <main className="w-full min-h-screen bg-gradient-to-br from-primary via-primary-200 to-primary-100 py-24 px-6 grid place-items-center">
       <ScrollRestoration />
       <form
         onSubmit={handleSubmit}
-        className="space-y-6 border border-secondary rounded-md text-secondary max-w-2xl mx-auto p-6"
+        className="max-w-3xl mx-auto bg-primary-300 rounded-xl shadow-lg border border-secondary/20 p-8 space-y-8"
       >
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-medium text-secondary">
-              Create New Event
-            </h2>
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-secondary/20 pb-4">
+          <h2 className="text-2xl font-semibold text-white">
+            Create New Event
+          </h2>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="text-secondary hover:text-white transition-colors duration-200 flex items-center gap-1"
+          >
+            <FaChevronLeft size={14} />
+            <span className="hidden sm:inline">Back</span>
+          </button>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/50 text-red-200 p-4 rounded-lg flex items-center justify-between">
+            <p className="text-sm max-w-[55ch]">{error}</p>
             <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="text-secondary hover:text-secondary-200"
+              onClick={() => setError(null)}
+              className="text-red-200 hover:text-red-100 p-1 rounded-full focus:ring-2 focus:ring-red-400"
             >
-              Back
+              <FaX size={12} />
             </button>
-            {/* <SeedDatabase /> */}
           </div>
+        )}
 
-          {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded flex items-center gap-2 relative">
-              <button
-                onClick={() => setError(null)}
-                className="text-sm cursor-pointer rounded-sm focus:ring-1 bg-red-500 text-red-200 absolute top-4 -translate-y-1/2 right-2 focus:ring-red-400 p-1"
-              >
-                <FaX className="shrink-0" />
-              </button>
-              <p className="max-w-[55ch]">{error}</p>
-            </div>
-          )}
+        {/* Event Details Section */}
+        <section className="space-y-6">
+          <h3 className="text-lg font-medium text-white">Event Details</h3>
+          <FormInput
+            type="text"
+            placeholder="Event Name"
+            value={formData.name}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, name: e.target.value }))
+            }
+            required
+            name="event-name"
+            label="Event Name"
+            hasLabel
+            className="w-full p-3 bg-primary-200 border-secondary/70 text-white rounded-lg focus:ring-2 focus:ring-secondary-200"
+          />
 
-          {/* Basic Event Details */}
-          <div className="space-y-4">
-            <FormInput<string>
-              type="text"
-              placeholder="Event Name"
-              value={formData.name}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setFormData((prev) => ({ ...prev, name: e.target?.value }))
-              }
-              required
-              name="event-name"
-              className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
-            />
+          <DatePickerWithRange
+            className="w-full bg-primary-200 border-secondary/70 text-white rounded-lg focus:ring-2 focus:ring-secondary-200"
+            value={formDateRange}
+            onChange={handleDateRangeChange}
+          />
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormInput<string>
-                type="datetime-local"
-                value={formData.startDate}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    startDate: e.target.value,
-                  }))
-                }
-                withLabel={true}
-                label="When is the event starting:"
-                className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
-                required
-              />
+          <FormInput
+            type="text"
+            placeholder="Location"
+            value={formData.location}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, location: e.target.value }))
+            }
+            label="Location"
+            hasLabel
+            className="w-full p-3 bg-primary-200 border-secondary/30 text-white rounded-lg focus:ring-2 focus:ring-secondary-200"
+            required
+          />
 
-              <FormInput<string>
-                type="datetime-local"
-                value={formData.endDate}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, endDate: e.target.value }))
-                }
-                withLabel={true}
-                label="When is the event ending:"
-                className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
-                required
-              />
-            </div>
-
-            <FormInput<string>
-              type="text"
-              placeholder="Location"
-              value={formData.location}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, location: e.target.value }))
-              }
-              className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
-              required
-            />
-
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              Description
+            </label>
             <textarea
               placeholder="Event Description"
               value={formData.description}
@@ -138,66 +163,71 @@ export default function EventCreationForm() {
                   description: e.target.value,
                 }))
               }
-              className="w-full p-2 border rounded h-32 placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
+              className="w-full p-3 bg-primary-200 border border-secondary/30 rounded-lg text-white placeholder:text-secondary-100 focus:ring-2 focus:ring-secondary-200 h-32 resize-y"
               required
             />
+          </div>
 
-            <FormInput<string>
+          <FormInput
+            type="text"
+            placeholder="Category"
+            list="categories"
+            value={formData.category}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, category: e.target.value }))
+            }
+            label="Category"
+            hasLabel
+            className="w-full p-3 bg-primary-200 border-secondary/30 text-white rounded-lg focus:ring-2 focus:ring-secondary-200"
+            required
+          />
+        </section>
+
+        {/* Image Upload Section */}
+        <section className="space-y-6">
+          <h3 className="text-lg font-medium text-white">Event Image</h3>
+          <div className="flex flex-col gap-4">
+            <FormInput
               type="text"
-              placeholder="Category"
-              list="categories"
-              value={formData.category}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, category: e.target.value }))
-              }
-              className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
-              required
+              placeholder="Image URL"
+              value={imageUrl || ""}
+              onChange={handleImageUrlChange}
+              label="Image URL"
+              hasLabel
+              className="w-full p-3 bg-primary-200 border-secondary/30 text-white rounded-lg focus:ring-2 focus:ring-secondary-200"
+              disabled={!!imageFile}
+            />
+            <p className="text-center text-secondary-100 text-sm">OR</p>
+            <ImagePreview
+              imageFile={imageFile}
+              imageUrl={imageUrl}
+              previewUrl={previewUrl}
+              setPreviewUrl={setPreviewUrl}
+              setImageFile={setImageFile}
+              setImageUrl={setImageUrl}
             />
           </div>
+        </section>
 
-          {/* Image Upload */}
-          <div className="space-y-4 mb-8">
-            <div className="flex flex-col gap-4">
-              <div className="flex-1">
-                <FormInput<string>
-                  type="text"
-                  placeholder="Image URL"
-                  value={imageUrl || ""}
-                  onChange={handleImageUrlChange}
-                  className="w-full p-2 border rounded placeholder:text-secondary-100 outline-none focus:ring-2 focus:ring-secondary-200"
-                  disabled={!!imageFile}
-                />
-              </div>
-
-              <p className="text-center">OR</p>
-
-              <ImagePreview
-                imageFile={imageFile}
-                imageUrl={imageUrl}
-                previewUrl={previewUrl}
-                setPreviewUrl={setPreviewUrl}
-                setImageFile={setImageFile}
-                setImageUrl={setImageUrl}
-              />
-            </div>
+        {/* Ticket Types Section */}
+        <section className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium text-white">Ticket Types</h3>
+            <Button
+              type="button"
+              onClick={addTicketType}
+              className="flex items-center gap-2 px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-200 transition-all duration-200"
+            >
+              <FaPlus size={14} />
+              <span className="hidden sm:inline">Add Ticket Type</span>
+            </Button>
           </div>
-
-          {/* Ticket Types */}
+          {ticketTypes.length === 0 && (
+            <p className="text-secondary-100 text-sm">
+              No ticket types added yet.
+            </p>
+          )}
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium">Ticket Types</h3>
-              <button
-                type="button"
-                onClick={addTicketType}
-                className="px-4 py-2 bg-secondary border-primary-100 border text-white rounded hover:bg-primary-200 transition-all duration-200 cursor-pointer"
-              >
-                <span className="hidden md:block">Add Ticket Type</span>
-                <span className="md:hidden">
-                  <FaPlus size={14} />
-                </span>
-              </button>
-            </div>
-
             {ticketTypes.map((ticket, index) => (
               <TicketTypeForm
                 key={index}
@@ -209,20 +239,20 @@ export default function EventCreationForm() {
               />
             ))}
           </div>
+        </section>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`w-full py-3 rounded text-white font-medium
-            ${
-              isLoading
-                ? "bg-secondary-400/80"
-                : "bg-secondary hover:bg-secondary-200"
-            } transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed`}
-          >
-            {isLoading ? "Creating Event..." : "Create Event"}
-          </button>
-        </div>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className={`w-full py-3 rounded-lg font-medium text-white transition-all duration-300 ${
+            isLoading
+              ? "bg-secondary-400/80 cursor-not-allowed"
+              : "bg-secondary hover:bg-secondary-200 focus:ring-2 focus:ring-secondary-500"
+          }`}
+        >
+          {isLoading ? "Creating Event..." : "Create Event"}
+        </button>
       </form>
     </main>
   );

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export default function CTA() {
   return (
-    <section className="py-20 bg-gradient-to-r from-primary-100 to-secondary relative z-10">
+    <section className="py-20 bg-gradient-to-r from-primary-300 to-primary relative z-10">
       <div className="container mx-auto px-4 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -11,10 +11,10 @@ export default function CTA() {
           viewport={{ once: true }}
           className="max-w-3xl mx-auto"
         >
-          <h2 className="text-4xl font-bold text-white mb-6">
+          <h2 className="text-4xl font-bold text-gray-200 mb-6">
             Ready to Experience Amazing Events?
           </h2>
-          <p className="text-white/80 text-lg mb-8">
+          <p className="text-gray-400 text-md mb-8">
             Join thousands of users who discover and attend events through
             Tesarus every day.
           </p>

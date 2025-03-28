@@ -82,3 +82,21 @@ export const getUpcomingEvents = async () => {
 
   return upcomingEvents;
 };
+
+export const getUserEvents = async (userId: string) => {
+  const { data: events, error } = await supabase
+    .from("events")
+    .select("*")
+    .eq("organizerId", userId)
+    .order("createdAt", { ascending: false });
+
+  if (error) throw error;
+
+  return events;
+};
+
+export const deleteEvent = async (eventId: string) => {
+  const { error } = await supabase.from("events").delete().eq("id", eventId);
+  if (error) throw error;
+  return { success: true };
+};

@@ -94,7 +94,9 @@ export default function ImagePreview({
           </button>
         </div>
       ) : (
-        <p>Drag & drop an image here, or click to select</p>
+        <p className="text-gray-500">
+          Drag & drop an image here, or click to select
+        </p>
       )}
     </div>
   );

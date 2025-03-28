@@ -30,8 +30,7 @@ export const getUserTickets = async (userId: string): Promise<Ticket[]> => {
       .eq("userId", userId);
 
     if (error) throw error;
-
-    console.log(userTickets);
+    if (!userTickets) return [];
     return userTickets;
   } catch (error) {
     console.error("Error getting user tickets:", error);

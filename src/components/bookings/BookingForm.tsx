@@ -4,8 +4,9 @@ import { generateTicketCode } from "../../utils/constants";
 import { bookTicket } from "../../services/ticketServices";
 import { supabase } from "../../services/supabaseClient";
 import { Input } from "../ui/input";
-import { Select } from "../ui/select";
+import { Select } from "./select";
 import { TicketDetails } from "./TicketDetails";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface BookingFormProps {
   event: Event | null;
@@ -14,6 +15,7 @@ interface BookingFormProps {
 }
 
 export function BookingForm({ event, userId, onSubmit }: BookingFormProps) {
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<TicketType | null>(null);
   const [ticketData, setTicketData] = useState<Omit<Ticket, "id">>({
@@ -66,18 +68,34 @@ export function BookingForm({ event, userId, onSubmit }: BookingFormProps) {
           type="text"
           placeholder="Enter your name"
           label="Name"
+          onChange={(e) =>
+            setTicketData((prev) => ({
+              ...prev,
+              name: e.target.value,
+            }))
+          }
+          value={`${user?.firstname} ${user?.lastname}`}
           required
           hasLabel
         />
+
         <Input
           id="email"
           name="email"
           type="email"
           placeholder="Enter your email"
           label="Email"
+          value={user?.email}
+          onChange={(e) =>
+            setTicketData((prev) => ({
+              ...prev,
+              email: e.target.value,
+            }))
+          }
           required
           hasLabel
         />
+
         <Select
           hasLabel
           label="What type of ticket?"
@@ -95,19 +113,27 @@ export function BookingForm({ event, userId, onSubmit }: BookingFormProps) {
           id="ticketType"
           name="ticketType"
         />
-        <textarea
-          name="special-request"
-          id="special-request"
-          value={ticketData.specialRequests}
-          onChange={(e) =>
-            setTicketData((prev) => ({
-              ...prev,
-              specialRequests: e.target.value,
-            }))
-          }
-          className="mt-1 block w-full rounded-md bg-primary-300 border outline-none p-2 text-white border-secondary-200 text-sm"
-        />
+
+        <div>
+          <label className="text-secondary" htmlFor="special-request">
+            Special Requests
+          </label>
+          <textarea
+            name="special-request"
+            id="special-request"
+            value={ticketData.specialRequests}
+            onChange={(e) =>
+              setTicketData((prev) => ({
+                ...prev,
+                specialRequests: e.target.value,
+              }))
+            }
+            className="mt-1 block w-full rounded-md bg-primary-300 border outline-none p-2 text-white border-secondary-200 text-sm"
+          />
+        </div>
+
         {selectedTicket && <TicketDetails ticket={selectedTicket} />}
+
         <button
           type="submit"
           className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-secondary hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-500 cursor-pointer hover:bg-secondary-100 transition-colors duration-200"

@@ -43,7 +43,12 @@ export function EventDetails({ event, organizer }: EventDetailsProps) {
         <div className="flex items-center md:items-end gap-3 my-0 flex-col md:flex-row">
           <div className="flex items-center text-secondary bg-secondary-200 p-1 rounded-md">
             <FaMap className="inline-block mr-2 text-secondary" size={12} />
-            <span className="text-xs">{event.location}</span>
+            <span
+              className="text-xs line-clamp-1 truncate block w-[25ch]"
+              title={event.location}
+            >
+              {event.location}
+            </span>
           </div>
           <div
             className="flex items-center text-secondary p-1 rounded-md"
