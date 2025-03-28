@@ -38,7 +38,7 @@ const ClientTickets = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-primary via-primary-200 to-primary-100 flex flex-col">
+    <div className="min-h-screen w-full flex flex-col">
       {/* Tickets List */}
       <div className="flex-1 w-full p-6 pt-20 md:pt-16">
         <div className="mb-8">

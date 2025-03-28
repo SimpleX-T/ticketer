@@ -192,7 +192,7 @@ const Settings = () => {
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
-                  className="w-full p-2 bg-primary-200 border border-secondary/30 rounded-lg text-white text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-secondary file:text-white file:hover:bg-secondary-200 transition-all duration-200"
+                  className="w-full p-2 bg-primary-200 border border-secondary/30 rounded-lg text-white text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-secondary file:text-white file:hover:bg-secondary-200 transition-all duration-200 cursor-pointer"
                   disabled={loading}
                 />
               </div>
