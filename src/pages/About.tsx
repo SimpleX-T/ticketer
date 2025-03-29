@@ -100,7 +100,7 @@ export default function AboutUs() {
             Ready to bring your next event to life?
           </p>
           <Link
-            to="/create-event"
+            to="/create"
             className="inline-flex items-center gap-2 px-6 py-3 bg-secondary text-white font-medium rounded-lg hover:bg-secondary-200 focus:ring-2 focus:ring-secondary-500 transition-all duration-300"
           >
             Get Started <FaRocket size={16} />
