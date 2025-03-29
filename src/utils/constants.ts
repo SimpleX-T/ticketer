@@ -61,3 +61,9 @@ export const generateTicketCode = () => {
   }
   return result;
 };
+
+export const sonnerStyle = {
+  background: "#1e293b",
+  color: "#24a0b5",
+  border: "1px solid #24a0b550",
+};

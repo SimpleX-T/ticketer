@@ -3,6 +3,9 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import { Event } from "../../../types";
 import { AnimatePresence, motion } from "motion/react";
 import { FaEllipsisVertical } from "react-icons/fa6";
+import { Share2 } from "lucide-react";
+import { toast } from "sonner";
+import { sonnerStyle } from "@/utils/constants";
 
 export default function ClientEventCard({
   event,
@@ -29,6 +32,28 @@ export default function ClientEventCard({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleShare = async (event: Event) => {
+    try {
+      const shareData = {
+        title: event.name,
+        text: event.description,
+        url: window.location.href,
+      };
+
+      if (navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        console.log("Event shared successfully");
+      } else {
+        console.log("Event not shared");
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error)
+        toast(error.message, {
+          style: sonnerStyle,
+        });
+    }
+  };
 
   return (
     <div className="bg-primary-300 p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border border-secondary/20 relative">
@@ -66,6 +91,17 @@ export default function ClientEventCard({
               transition={{ duration: 0.2 }}
               className="absolute top-full right-0 mt-2 w-32 bg-primary-300 border border-secondary/20 rounded-lg shadow-lg overflow-hidden z-10"
             >
+              <li>
+                <button
+                  onClick={() => {
+                    handleShare(event);
+                    setShowMenu(false);
+                  }}
+                  className="w-full px-3 py-2 text-sm cursor-pointer text-secondary hover:bg-secondary-200/30 transition-colors duration-200 flex items-center gap-2"
+                >
+                  <Share2 size={12} /> Share
+                </button>
+              </li>
               <li>
                 <button
                   onClick={() => {

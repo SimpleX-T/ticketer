@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Event } from "../../../types";
 import { FaX } from "react-icons/fa6";
 import { uploadToCloudinary } from "../../../utils/helpers";
+import { toast } from "sonner";
+import { sonnerStyle } from "@/utils/constants";
 
 export default function EditEventModal({
   handleEditSubmit,
@@ -42,7 +44,10 @@ export default function EditEventModal({
         handleEditSubmit(e);
       }
     } catch (error) {
-      console.error("Image upload failed:", error);
+      if(error instanceof Error)
+        toast(error.message, {
+          style: sonnerStyle
+        })
     } finally {
       setIsUploading(false);
     }

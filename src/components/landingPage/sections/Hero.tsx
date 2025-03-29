@@ -1,7 +1,10 @@
+// import { Search } from "lucide-react";
+// import { useState } from "react";
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 
 export default function Hero() {
+  // const [query, setQuery] = useState("");
   return (
     <section className="relative bg-gradient-to-br from-primary via-primary-200 overflow-hidden to-primary-100 min-h-screen">
       <div className="absolute top-full -translate-y-[100px] md:-translate-y-[150px] blur-[7px] w-full aspect-square rounded-[1000vh] border-[10px] border-secondary z-[2] " />
@@ -40,27 +43,27 @@ export default function Hero() {
           </p>
 
           {/* Search Bar */}
-          {/* <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="max-w-3xl mx-auto mb-10 relative"
-            >
-              <div className="relative flex items-center">
-                <div className="absolute left-4 text-secondary/70">
-                  <FiSearch size={20} />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search for events, concerts, workshops..."
-                  className="w-full p-4 pl-12 pr-4 rounded-full border-2 border-secondary/30 focus:border-secondary/70 text-secondary bg-white/90 backdrop-blur-sm placeholder:text-secondary/50 focus:outline-none shadow-lg"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div> */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="max-w-3xl mx-auto mb-10 relative"
+          >
+            {/* <div className="relative flex items-center">
+              <div className="absolute left-4 text-secondary/70">
+                <Search size={20} />
+              </div>
+              <input
+                type="text"
+                placeholder="Search for events, concerts, workshops..."
+                className="w-full p-4 pl-12 pr-4 rounded-full border-2 border-secondary/30 focus:border-secondary/70 text-secondary bg-white/90 backdrop-blur-sm placeholder:text-secondary/50 focus:outline-none shadow-lg"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div> */}
 
-          {/* Category Pills */}
-          {/* <div className="flex flex-wrap justify-center gap-2 mt-4">
+            {/* Category Pills */}
+            {/* <div className="flex flex-wrap justify-center gap-2 mt-4">
                 {categories.map((category) => (
                   <button
                     key={category.id}
@@ -74,8 +77,8 @@ export default function Hero() {
                     {category.name}
                   </button>
                 ))}
-              </div>
-            </motion.div> */}
+              </div> */}
+          </motion.div>
 
           <div className="flex gap-4 justify-center">
             <Link

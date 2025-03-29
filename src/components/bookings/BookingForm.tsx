@@ -1,12 +1,13 @@
 import { FormEvent, useState } from "react";
 import { Ticket, Event, TicketType } from "../../types";
-import { generateTicketCode } from "../../utils/constants";
+import { generateTicketCode, sonnerStyle } from "../../utils/constants";
 import { bookTicket } from "../../services/ticketServices";
 import { supabase } from "../../services/supabaseClient";
 import { Input } from "../ui/input";
 import { Select } from "./select";
 import { TicketDetails } from "./TicketDetails";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface BookingFormProps {
   event: Event | null;
@@ -39,8 +40,12 @@ export function BookingForm({ event, userId, onSubmit }: BookingFormProps) {
         userId
       );
       await onSubmit(ticket);
-    } catch (error) {
-      console.log(error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast(`Error booking ticket:, ${error.message}`, {
+          style: sonnerStyle,
+        });
+      }
     } finally {
       setIsLoading(false);
     }

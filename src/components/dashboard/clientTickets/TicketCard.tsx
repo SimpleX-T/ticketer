@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { DeleteModal } from "./DeleteModal";
 import { TicketPreviewModal } from "./TicketPreviewModal";
+import { toast } from "sonner";
+import { sonnerStyle } from "@/utils/constants";
 
 export function TicketCard({
   ticket,
@@ -120,7 +122,7 @@ export function TicketCard({
       const date = new Date(ticketEvent.startDate);
       return format(date, "MMM d, yyyy");
     } catch (e) {
-      return "Invalid date" + e;
+      if(e instanceof Error) toast(e.message,{style: sonnerStyle});
     }
   };
 
@@ -131,7 +133,7 @@ export function TicketCard({
       const date = new Date(ticketEvent.startDate);
       return format(date, "h:mm a");
     } catch (e) {
-      return "" + e;
+      if(e instanceof Error) toast(e.message,{style: sonnerStyle});
     }
   };
 

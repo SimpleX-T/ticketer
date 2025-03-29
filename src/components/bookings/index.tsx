@@ -7,6 +7,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Event, User } from "../../types";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../services/supabaseClient";
+import { toast } from "sonner";
+import { sonnerStyle } from "@/utils/constants";
 
 export default function Booking() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -38,8 +40,18 @@ export default function Booking() {
       setOrganizer(data);
     };
 
-    getEventDetails().catch(console.error);
-    getOrganizerDetails().catch(console.error);
+    getEventDetails().catch((err: unknown) => {
+      if (err instanceof Error)
+        toast(err.message, {
+          style: sonnerStyle,
+        });
+    });
+    getOrganizerDetails().catch((err: unknown) => {
+      if (err instanceof Error)
+        toast(err.message, {
+          style: sonnerStyle,
+        });
+    });
   }, [eventId, event?.organizerId]);
 
   const handleBookingSubmit = async () => {

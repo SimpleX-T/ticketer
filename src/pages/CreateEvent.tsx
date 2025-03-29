@@ -3,6 +3,8 @@ import EventCreationForm from "../components/createEvent";
 import { useAuth } from "../contexts/AuthContext";
 import { useState } from "react";
 import { updateUser } from "../services/userServices";
+import { toast } from "sonner";
+import { sonnerStyle } from "@/utils/constants";
 
 export default function CreateEvent() {
   const { user } = useAuth();
@@ -20,7 +22,10 @@ export default function CreateEvent() {
 
       if (success) setModalIsOpen(false);
     } catch (error) {
-      console.log(error);
+      if (error instanceof Error)
+        toast(error.message, {
+          style: sonnerStyle,
+        });
     } finally {
       setLoading(false);
     }
