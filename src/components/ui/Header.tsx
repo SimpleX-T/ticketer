@@ -1,6 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { FaTicketAlt, FaUserCircle } from "react-icons/fa";
+import { FaUserCircle } from "react-icons/fa";
 import { HiMenu, HiX } from "react-icons/hi";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../../contexts/AuthContext";
@@ -68,11 +68,10 @@ export default function Header() {
       <div className="flex items-center space-x-3">
         {/* Tickets Button */}
         <Link
-          to="/dashboard/tickets"
+          to="/events"
           className={`relative border text-secondary p-2 md:px-4 py-2 rounded-full hidden lg:flex items-center bg-primary-300 hover:bg-primary-100 transition-colors duration-300`}
         >
-          <FaTicketAlt className="mr-2" />
-          <span>MY TICKETS</span>
+          <span>Explore Events</span>
         </Link>
 
         {/* User Profile or Login */}

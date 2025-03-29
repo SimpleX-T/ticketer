@@ -17,6 +17,7 @@ import EventsPage from "./pages/EventsPage";
 import AboutUs from "./pages/About";
 import Tickets from "./pages/dashboard/Tickets";
 import Events from "./pages/dashboard/Events";
+import { Toaster } from "@/components/ui/sonner";
 
 const queryClient = new QueryClient();
 
@@ -102,6 +103,7 @@ const router = createBrowserRouter([
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <Toaster />
       <ReactQueryDevtools initialIsOpen={false} />
       <AuthProvider>
         <AppProvider>

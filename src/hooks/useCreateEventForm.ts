@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Event, TicketType } from "../types";
 import { useAuth } from "../contexts/AuthContext";
-import { INITIAL_TICKET_TYPE } from "../utils/constants";
+import { INITIAL_TICKET_TYPE, sonnerStyle } from "../utils/constants";
 import { uploadToCloudinary } from "../utils/helpers";
+import { toast } from "sonner";
 
 export const useEventForm = (
   createEvent: (
@@ -76,11 +77,9 @@ export const useEventForm = (
     }
   };
 
-
   const addTicketType = () => {
     setTicketTypes((prev) => [...prev, { ...INITIAL_TICKET_TYPE }]);
   };
-
 
   const removeTicketType = (index: number) => {
     setTicketTypes((prev) => {
@@ -93,7 +92,6 @@ export const useEventForm = (
       return newTypes;
     });
   };
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,14 +121,12 @@ export const useEventForm = (
 
       let _imageUrl = imageUrl;
 
-
       if (imageFile) {
         const response = await uploadToCloudinary(imageFile);
 
         if (!response) throw new Error("Image upload failed");
         _imageUrl = response;
       }
-
 
       const eventData: Omit<
         Event,
@@ -141,16 +137,19 @@ export const useEventForm = (
         ticketTypes,
       };
 
-
       await createEvent(eventData);
       navigate("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      if (err instanceof Error) {
+        setError(err.message);
+        toast(err.message, { style: sonnerStyle });
+      } else {
+        setError("An error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
   };
-
 
   return {
     formData,

@@ -4,6 +4,8 @@ import { updateUser } from "../../../services/userServices";
 import { uploadToCloudinary } from "../../../utils/helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FaUserCircle } from "react-icons/fa";
+import { toast } from "sonner";
+import { sonnerStyle } from "@/utils/constants";
 
 const Settings = () => {
   const { user } = useAuth();
@@ -84,7 +86,11 @@ const Settings = () => {
         await updateMutation.mutateAsync(updatedFields);
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      if(error instanceof Error) {
+      setError(error.message ? error.message : "An error occurred");
+      toast(error.message, {style: sonnerStyle})
+    }
+
     } finally {
       setLoading(false);
     }

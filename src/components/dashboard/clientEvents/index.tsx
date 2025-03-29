@@ -8,7 +8,8 @@ import { Event } from "../../../types";
 import ClientEventCard from "./ClientEventCard";
 import EditEventModal from "./EditEventModal";
 import DeleteEventModal from "./DeleteEventModal";
-import { FaPlus, FaWpexplorer } from "react-icons/fa6";
+import { FaWpexplorer } from "react-icons/fa6";
+import { PlusIcon } from "lucide-react";
 
 export default function ClientEvents() {
   const { user } = useAuth();
@@ -70,7 +71,7 @@ export default function ClientEvents() {
             to="/create"
             className="flex items-center gap-1 p-2 rounded-sm cursor-pointer hover:bg-secondary/70 transition-colors duration-150 bg-secondary text-white text-xs"
           >
-            <FaPlus />
+            <PlusIcon />
             <span className="hidden md:block">Create Event</span>
           </Link>
         ) : (
@@ -96,12 +97,6 @@ export default function ClientEvents() {
           />
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-100" />
         </div>
-        <Link
-          to="/create-event"
-          className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary-200 transition-colors duration-200"
-        >
-          Create New Event
-        </Link>
       </div>
 
       {/* Events List */}
