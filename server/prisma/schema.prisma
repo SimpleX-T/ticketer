@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  email         String    @unique
+  passwordHash  String?   // Null for OAuth-only users
+  firstname     String
+  lastname      String
+  displayName   String?
+  profileImage  String?
+  role          Role      @default(USER)
+  provider      Provider  @default(EMAIL)
+  providerId    String?   // OAuth provider user ID
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  events        Event[]   @relation("OrganizerEvents")
+  tickets       Ticket[]
+  refreshTokens RefreshToken[]
+}
+
+enum Role {
+  USER
+  ORGANIZER
+  ADMIN
+}
+
+enum Provider {
+  EMAIL
+  GOOGLE
+  GITHUB
+}
+
+model RefreshToken {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  token     String   @unique
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model VerificationToken {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  token     String    @unique
+  email     String
+  type      TokenType
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+}
+
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+model Event {
+  id                String       @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  description       String
+  location          String
+  image             String
+  startDate         DateTime
+  endDate           DateTime
+  category          String
+  maxTicketsPerUser Int          @default(4)
+  totalCapacity     Int
+  ticketsSold       Int          @default(0)
+  soldOut           Boolean      @default(false)
+  status            EventStatus  @default(PUBLISHED)
+  organizerId       String       @db.ObjectId
+  organizer         User         @relation("OrganizerEvents", fields: [organizerId], references: [id])
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  ticketTypes       TicketType[]
+  tickets           Ticket[]
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+}
+
+model TicketType {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  price       Float
+  type        String   // VIP, REGULAR, etc.
+  total       Int
+  available   Int
+  benefits    String[] // Array of benefit strings
+  eventId     String   @db.ObjectId
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  tickets     Ticket[]
+}
+
+model Ticket {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  ticketCode      String    @unique @default(cuid())
+  qrCode          String?   // Base64 QR code
+  purchaseDate    DateTime  @default(now())
+  isTransferred   Boolean   @default(false)
+  transferredTo   String?
+  specialRequests String?
+  checkedIn       Boolean   @default(false)
+  checkedInAt     DateTime?
+
+  userId          String    @db.ObjectId
+  user            User      @relation(fields: [userId], references: [id])
+  eventId         String    @db.ObjectId
+  event           Event     @relation(fields: [eventId], references: [id])
+  ticketTypeId    String    @db.ObjectId
+  ticketType      TicketType @relation(fields: [ticketTypeId], references: [id])
+}
