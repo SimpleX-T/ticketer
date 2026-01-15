@@ -96,3 +96,32 @@ export const searchEvents = async (
   const { data } = await apiClient.get<EventsResponse>(`/events?${params}`);
   return data.events;
 };
+
+export interface ListEventsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+}
+
+export const listEvents = async (
+  params: ListEventsParams = {}
+): Promise<EventsResponse> => {
+  const searchParams = new URLSearchParams();
+
+  if (params.page) searchParams.append("page", params.page.toString());
+  if (params.limit) searchParams.append("limit", params.limit.toString());
+  if (params.search) searchParams.append("search", params.search);
+  if (params.category) searchParams.append("category", params.category);
+  if (params.startDate) searchParams.append("startDate", params.startDate);
+  if (params.endDate) searchParams.append("endDate", params.endDate);
+  if (params.status) searchParams.append("status", params.status);
+
+  const { data } = await apiClient.get<EventsResponse>(
+    `/events?${searchParams}`
+  );
+  return data;
+};

@@ -11,6 +11,7 @@ import EventsPage from "../pages/EventsPage";
 import AboutUs from "../pages/About";
 import Tickets from "../pages/dashboard/Tickets";
 import Events from "../pages/dashboard/Events";
+import SavedEvents from "../pages/dashboard/SavedEvents";
 import UserDashboard from "../pages/dashboard";
 import CreateEvent from "../pages/CreateEvent";
 import Signup from "../pages/auth/signup";
@@ -92,6 +93,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Events />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "saved",
+        element: (
+          <ProtectedRoute>
+            <SavedEvents />
           </ProtectedRoute>
         ),
       },

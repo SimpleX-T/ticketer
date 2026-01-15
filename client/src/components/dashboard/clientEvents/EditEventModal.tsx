@@ -10,7 +10,7 @@ export default function EditEventModal({
   editEvent,
   setEditEvent,
 }: {
-  handleEditSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  handleEditSubmit: (imageUrl?: string) => void;
   editEvent: Event | null;
   setEditEvent: React.Dispatch<React.SetStateAction<Event | null>>;
 }) {
@@ -33,21 +33,24 @@ export default function EditEventModal({
     e.preventDefault();
     setIsUploading(true);
     try {
+      let newImageUrl: string | undefined;
+
       if (imageFile) {
-        const imageUrl = await uploadToCloudinary(imageFile);
-        if (imageUrl) {
-          setEditEvent({ ...editEvent, image: imageUrl });
-          // Call handleEditSubmit after image upload
-          handleEditSubmit(e);
+        newImageUrl = await uploadToCloudinary(imageFile);
+        if (!newImageUrl) {
+          toast("Failed to upload image", { style: sonnerStyle });
+          setIsUploading(false);
+          return;
         }
-      } else {
-        handleEditSubmit(e);
       }
+
+      // Always call handleEditSubmit, passing the new image URL if one was uploaded
+      handleEditSubmit(newImageUrl);
     } catch (error) {
-      if(error instanceof Error)
+      if (error instanceof Error)
         toast(error.message, {
-          style: sonnerStyle
-        })
+          style: sonnerStyle,
+        });
     } finally {
       setIsUploading(false);
     }

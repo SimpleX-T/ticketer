@@ -3,13 +3,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
 import { useAuth } from "../../../contexts/AuthContext";
-import { deleteEvent, getUserEvents } from "../../../services/eventServices";
+import {
+  deleteEvent,
+  getUserEvents,
+  updateEvent,
+} from "../../../services/eventServices";
 import { Event } from "../../../types";
 import ClientEventCard from "./ClientEventCard";
 import EditEventModal from "./EditEventModal";
 import DeleteEventModal from "./DeleteEventModal";
 import { FaWpexplorer } from "react-icons/fa6";
 import { PlusIcon } from "lucide-react";
+import { toast } from "sonner";
+import { sonnerStyle } from "@/utils/constants";
 
 export default function ClientEvents() {
   const { user } = useAuth();
@@ -38,16 +44,46 @@ export default function ClientEvents() {
     },
   });
 
+  // Update event mutation
+  const updateMutation = useMutation({
+    mutationFn: ({
+      eventId,
+      updates,
+    }: {
+      eventId: string;
+      updates: Partial<Event>;
+    }) => updateEvent(eventId, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userEvents", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
+      toast("Event updated successfully!", { style: sonnerStyle });
+      setEditEvent(null);
+    },
+    onError: (error: Error) => {
+      toast(`Failed to update: ${error.message}`, { style: sonnerStyle });
+    },
+  });
+
   // Filter events by search term
   const filteredEvents = events?.filter((event) =>
     event.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Stubbed edit submission (replace with actual update logic later)
-  const handleEditSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Add updateEvent mutation here
-    setEditEvent(null);
+  // Handle edit submission with optional new image URL
+  const handleEditSubmit = (imageUrl?: string) => {
+    if (!editEvent) return;
+
+    const updates: Partial<Event> = {
+      name: editEvent.name,
+      description: editEvent.description,
+      location: editEvent.location,
+      startDate: editEvent.startDate,
+      endDate: editEvent.endDate,
+      category: editEvent.category,
+      image: imageUrl || editEvent.image, // Use new image URL if provided
+    };
+
+    updateMutation.mutate({ eventId: editEvent.id, updates });
   };
 
   if (!user) {

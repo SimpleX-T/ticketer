@@ -41,7 +41,9 @@ export const listEvents = async (
   next: NextFunction
 ) => {
   try {
-    const result = await eventService.listEvents(req.query as any);
+    // Use validated query from middleware or raw query
+    const query = res.locals.validatedQuery || req.query;
+    const result = await eventService.listEvents(query as any);
     res.json(result);
   } catch (error) {
     next(error);

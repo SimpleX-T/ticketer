@@ -25,6 +25,9 @@ model User {
   events        Event[]   @relation("OrganizerEvents")
   tickets       Ticket[]
   refreshTokens RefreshToken[]
+  savedEvents   SavedEvent[]
+  reviews       Review[]
+  notifications Notification[]
 }
 
 enum Role {
@@ -83,6 +86,9 @@ model Event {
 
   ticketTypes       TicketType[]
   tickets           Ticket[]
+  savedBy           SavedEvent[]
+  reviews           Review[]
+  promoCodes        PromoCode[]
 }
 
 enum EventStatus {
@@ -124,4 +130,100 @@ model Ticket {
   event           Event     @relation(fields: [eventId], references: [id])
   ticketTypeId    String    @db.ObjectId
   ticketType      TicketType @relation(fields: [ticketTypeId], references: [id])
+
+  payment         Payment?
+}
+
+// ============================================
+// NEW MODELS FOR FEATURE EXPANSION
+// ============================================
+
+// Saved/Wishlist Events
+model SavedEvent {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  eventId   String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, eventId])
+}
+
+// Promo/Discount Codes
+model PromoCode {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  code        String    @unique
+  discount    Float     // Amount or percentage
+  isPercent   Boolean   @default(true)
+  maxUses     Int?      // Null = unlimited
+  usedCount   Int       @default(0)
+  minPurchase Float?    // Minimum purchase amount
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  eventId     String    @db.ObjectId
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+}
+
+// Payment Records
+model Payment {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  reference     String        @unique
+  amount        Float
+  currency      String        @default("NGN")
+  status        PaymentStatus @default(PENDING)
+  provider      String        @default("PAYSTACK")
+  providerRef   String?       // External payment reference
+  metadata      String?       // JSON string for additional data
+  ticketId      String        @unique @db.ObjectId
+  ticket        Ticket        @relation(fields: [ticketId], references: [id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+// Event Reviews & Ratings
+model Review {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  rating    Int      // 1-5 stars
+  comment   String?
+  userId    String   @db.ObjectId
+  eventId   String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, eventId])
+}
+
+// In-App Notifications
+model Notification {
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  type      NotificationType
+  title     String
+  message   String
+  data      String?          // JSON for additional data (eventId, ticketId, etc)
+  isRead    Boolean          @default(false)
+  userId    String           @db.ObjectId
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now())
+}
+
+enum NotificationType {
+  TICKET_PURCHASED
+  TICKET_TRANSFERRED
+  EVENT_REMINDER
+  EVENT_CANCELLED
+  EVENT_UPDATED
+  PROMO_CODE
+  REVIEW_REQUESTED
+  SYSTEM
 }

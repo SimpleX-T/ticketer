@@ -1,129 +1,218 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { FaSearch } from "react-icons/fa";
+import { motion } from "motion/react";
+import { Loader2, Calendar, Sparkles } from "lucide-react";
 
-import { categoryTags } from "../utils/constants";
-import { Input } from "../components/ui/input"; // Assuming you have this
-import { getUpcomingEvents } from "../services/eventServices";
-import { EventCard } from "../components/ui/EventCard";
+import { listEvents } from "../services/eventServices";
+import { EventCard } from "../components/events/EventCardNew";
+import { EventFilters, FilterState } from "../components/events/EventFilters";
 import { FeaturedEventCard } from "../components/events/FeaturedEventCard";
-import { Event } from "../types";
+import { Event, TicketType } from "../types";
 
 export default function EventsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
-  const { data: events, isLoading } = useQuery<Event[]>({
-    queryKey: ["upcomingEvents"],
-    queryFn: getUpcomingEvents,
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [filters, setFilters] = useState<FilterState>({
+    search: "",
+    category: "",
+    priceFilter: "all",
+    dateFilter: "all",
+    sortBy: "date_asc",
   });
 
-  // Filter events based on search and category
-  const filteredEvents = events?.filter((event) => {
-    const matchesSearch = event.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory
-      ? event.category === selectedCategory
-      : true;
-    return matchesSearch && matchesCategory;
+  // Fetch events
+  const { data: eventsData, isLoading } = useQuery({
+    queryKey: ["events", filters],
+    queryFn: () =>
+      listEvents({
+        search: filters.search || undefined,
+        category: filters.category || undefined,
+      }),
   });
 
-  // Get featured event (e.g., first non-sold-out event or first event)
-  const featuredEvent = events?.find((e) => !e.soldOut) || filteredEvents?.[0];
+  const events = eventsData?.events || [];
+
+  // Client-side filtering for price and date
+  const filteredEvents = useMemo(() => {
+    let result = [...events];
+
+    // Price filter
+    if (filters.priceFilter === "free") {
+      result = result.filter((e: Event) =>
+        e.ticketTypes?.some((tt: TicketType) => tt.price === 0)
+      );
+    } else if (filters.priceFilter === "paid") {
+      result = result.filter((e: Event) =>
+        e.ticketTypes?.every((tt: TicketType) => tt.price > 0)
+      );
+    }
+
+    // Date filter
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekEnd = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const monthEnd = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    if (filters.dateFilter === "today") {
+      result = result.filter((e) => {
+        const eventDate = new Date(e.startDate);
+        return eventDate.toDateString() === today.toDateString();
+      });
+    } else if (filters.dateFilter === "week") {
+      result = result.filter((e) => {
+        const eventDate = new Date(e.startDate);
+        return eventDate >= today && eventDate <= weekEnd;
+      });
+    } else if (filters.dateFilter === "month") {
+      result = result.filter((e) => {
+        const eventDate = new Date(e.startDate);
+        return eventDate >= today && eventDate <= monthEnd;
+      });
+    } else if (filters.dateFilter === "upcoming") {
+      result = result.filter((e) => new Date(e.startDate) >= today);
+    }
+
+    // Sort
+    result.sort((a, b) => {
+      switch (filters.sortBy) {
+        case "date_asc":
+          return (
+            new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+          );
+        case "date_desc":
+          return (
+            new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+          );
+        case "price_asc":
+          const minA = Math.min(
+            ...(a.ticketTypes?.map((t: TicketType) => t.price) || [0])
+          );
+          const minB = Math.min(
+            ...(b.ticketTypes?.map((t: TicketType) => t.price) || [0])
+          );
+          return minA - minB;
+        case "price_desc":
+          const maxA = Math.max(
+            ...(a.ticketTypes?.map((t: TicketType) => t.price) || [0])
+          );
+          const maxB = Math.max(
+            ...(b.ticketTypes?.map((t: TicketType) => t.price) || [0])
+          );
+          return maxB - maxA;
+        case "popularity":
+          return b.ticketsSold - a.ticketsSold;
+        case "newest":
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [events, filters]);
+
+  const featuredEvent = events.find((e: Event) => !e.soldOut) || events[0];
 
   return (
-    <div className="min-h-screen bg-primary text-secondary pb-12 pt-32">
-      <section className="relative px-6 md:px-10">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-8">
-            Discover Upcoming Events
-          </h1>
-          <div className="border border-secondary/40 mb-8 rounded-xl overflow-hidden shadow-sm">
-            {isLoading ? (
-              <div className="h-64 md:h-96 bg-primary-200 rounded-xl animate-pulse" />
-            ) : featuredEvent ? (
-              <FeaturedEventCard event={featuredEvent} />
-            ) : (
-              <p className="text-gray-300">No upcoming events found.</p>
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section className="px-6 md:px-10 mb-8">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-4 items-center">
-          <div className="relative w-full md:w-1/3">
-            <Input
-              id="search"
-              type="text"
-              placeholder="Search events..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-primary-200 text-white border-secondary-200"
-            />
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-100" />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className={`px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200 cursor-pointer ${
-                !selectedCategory
-                  ? "bg-primary border border-secondary text-white"
-                  : "bg-primary-300 text-secondary hover:bg-secondary-200"
-              }`}
-            >
-              All
-            </button>
-            {categoryTags.map((cat) => (
-              <button
-                key={cat.value}
-                onClick={() => setSelectedCategory(cat.value)}
-                className={`px-3 py-1 rounded-full text-sm font-medium cursor-pointer transition-colors duration-200 ${
-                  selectedCategory === cat.value
-                    ? "bg-primary border border-secondary text-white"
-                    : "bg-primary-300 text-secondary hover:bg-secondary-200"
-                }`}
-                style={{
-                  backgroundColor:
-                    selectedCategory === cat.value
-                      ? undefined
-                      : cat.backgroundColor,
-                  color:
-                    selectedCategory === cat.value ? undefined : cat.textColor,
-                }}
-              >
-                {cat.value}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Events Grid */}
-      <section className="px-6 md:px-10">
-        <div className="max-w-6xl mx-auto">
-          {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-64 bg-primary-200 rounded-xl animate-pulse"
-                />
-              ))}
+    <div className="min-h-screen bg-primary text-secondary pb-12 pt-28">
+      {/* Hero Section */}
+      <section className="relative px-6 md:px-10 mb-8">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8"
+          >
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3">
+                <Sparkles className="w-8 h-8 text-secondary" />
+                Discover Events
+              </h1>
+              <p className="text-secondary-100 mt-2">
+                Find amazing events happening near you
+              </p>
             </div>
-          ) : filteredEvents && filteredEvents.length > 1 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex items-center gap-2 text-sm text-secondary-100">
+              <Calendar className="w-4 h-4" />
+              {filteredEvents.length} events found
+            </div>
+          </motion.div>
+
+          {/* Featured Event */}
+          {!isLoading && featuredEvent && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="border border-secondary/20 rounded-2xl overflow-hidden shadow-xl mb-8"
+            >
+              <FeaturedEventCard event={featuredEvent} />
+            </motion.div>
+          )}
+        </div>
+      </section>
+
+      {/* Filters Section */}
+      <section className="px-6 md:px-10 mb-8 sticky top-20 z-20 bg-primary/80 backdrop-blur-xl py-4 -mt-4">
+        <div className="max-w-7xl mx-auto">
+          <EventFilters
+            onFilterChange={setFilters}
+            onViewChange={setViewMode}
+            viewMode={viewMode}
+          />
+        </div>
+      </section>
+
+      {/* Events Grid/List */}
+      <section className="px-6 md:px-10">
+        <div className="max-w-7xl mx-auto">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="w-10 h-10 text-secondary animate-spin mb-4" />
+              <p className="text-secondary-100">Loading events...</p>
+            </div>
+          ) : filteredEvents.length > 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className={
+                viewMode === "grid"
+                  ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                  : "flex flex-col gap-4"
+              }
+            >
               {filteredEvents
                 .filter((e) => e.id !== featuredEvent?.id)
-                .map((event) => (
-                  <EventCard key={event.id} event={event} />
+                .map((event, index) => (
+                  <motion.div
+                    key={event.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <EventCard event={event} viewMode={viewMode} />
+                  </motion.div>
                 ))}
-            </div>
+            </motion.div>
           ) : (
-            <p className="text-gray-300 text-center">
-              No events match your filters.
-            </p>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-20"
+            >
+              <div className="w-20 h-20 rounded-full bg-primary-200 flex items-center justify-center mx-auto mb-4">
+                <Calendar className="w-10 h-10 text-secondary-100" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                No events found
+              </h3>
+              <p className="text-secondary-100 max-w-md mx-auto">
+                {filters.search || filters.category
+                  ? "Try adjusting your filters to find more events"
+                  : "There are no upcoming events at the moment. Check back soon!"}
+              </p>
+            </motion.div>
           )}
         </div>
       </section>
